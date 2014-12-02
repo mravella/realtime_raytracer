@@ -1,0 +1,46 @@
+PROJECT PLAN
+by Mike Ravella and Sawyer Thompson
+mravella smt(<)3
+
+*********************
+*Real Time Rendering*
+*********************
+Real Time Rendering - Rendering will be done in a fragment shader in GLSL on a single quad.  The additional features that will be implemented include depth of field, skybox, ambient occlusion and refractions. We will also include functionality for rendering depth passes for use in the painterly rendering filter.  
+
+Depth of field algo:
+Assume the camera is an area instead of a point.  Use a specific t value as the depth of field of the camera.  Increase the area of the camera as we move further away from the desired t value.  Then jitter the camera position within the area of the disk to get the blurring.  Average the samples to get the blurred color. If this slows it down significantly, due to the large number of rays, we will output a depth pass and add blurring as a post effect in another frame buffer. 
+
+Skybox:
+Skybox will be implemented as a sphere instead of using the glsl skybox like from the labs.  This will essentially be implemented by surrounding the scene in a texture mapped sphere and sampling that sphere appropriately.
+
+Ambient Occlusion:
+Ambient occlusion will be implemented by shooting rays out from the hemisphere surrounding an intersection point, and giving them a cutoff distance.  Then we will just see how many of the rays intersect objects within their cutoff and essentially just computer number of intersections over number of rays.  
+
+Refractions:
+Refractions will be done quite similarly to reflections, except with using snells law to calculate directions of transmitted rays instead of just reflecting them.  We can also try to work in fresnel equations to make more realistic transmittance.
+
+References:
+My most common reference will probably be the glsl docs.
+
+*********************
+*Painterly Rendering*
+*********************
+
+Using a modified version of the algorithm presented int this paper: http://www.mrl.nyu.edu/publications/painterly98/hertzmann-siggraph98.pdf, we will make it so that any scene being viewed in our program can be turned into a digital painting, based on a number of parameters.
+
+A general overview of the algorithm:
+The algorithm starts by taking in an image and any number (probably ideally around 3) radii to use as brushes. For each brush, it blurs a copy of the source image an amount based on the size of the brush, then places strokes of that size on the canvas, in places found by comparing the amount of contrast between the source and original image in a given stroke area. By repeating this with different brush sizes, the process of actually creating a painting is recreated astonishingly well.
+
+One thing that initially bothered me about this algorithm is that it ignores an important aspect of painting, which is creating a sense of depth. Usually, one of the main ways that a feeling of depth is established is by using finer strokes and higher contrast on nearby objects, and broader strokes and lower contrast on distant objects. We can recreate this by passing in a depth pass generated during raytracing to the original algorithm and factoring it in when deciding where to place strokes of different sizes.
+
+There's also a lot of room to add little features to the painterly rendering (for example, varying the shape of brush strokes or combining it with other filters), but I think it makes sense to write the original algorithm and testing it with our scene before deciding which additional features to add.
+
+******************
+*Program Overview*
+******************
+There will be a viewport of one quad rendering a scene.  Check boxes on the side will allow you to turn on and off certain features. A button and a hotkey will BOTH be available for creating a painterly render, because we like to give the user the prerogative.  Hotkeys will also switch scenes.
+
+*******************
+*Division of Labor*
+*******************
+Mike will work on OG rendering, and Sawyer will work on painterly rendering.  We will work together on GUI and user interactions.  We will start with the filter in the cs123 project filter, and the fragment shader renderer in shader toy.  
