@@ -48,12 +48,14 @@ OBJECTS_DIR   = ./
 SOURCES       = ../src/main.cpp \
 		../src/mainwindow.cpp \
 		../src/view.cpp \
-		../src/lib/ResourceLoader.cpp moc_mainwindow.cpp \
+		../src/lib/ResourceLoader.cpp \
+		../src/camera.cpp moc_mainwindow.cpp \
 		moc_view.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		view.o \
 		ResourceLoader.o \
+		camera.o \
 		moc_mainwindow.o \
 		moc_view.o
 DIST          = ../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/mkspecs/features/spec_pre.prf \
@@ -421,7 +423,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/final1.0.0 || mkdir -p .tmp/final1.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.h ../src/view.h ../src/lib/ResourceLoader.h .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/main.cpp ../src/mainwindow.cpp ../src/view.cpp ../src/lib/ResourceLoader.cpp .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.ui .tmp/final1.0.0/ && (cd `dirname .tmp/final1.0.0` && $(TAR) final1.0.0.tar final1.0.0 && $(COMPRESS) final1.0.0.tar) && $(MOVE) `dirname .tmp/final1.0.0`/final1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/final1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.h ../src/view.h ../src/lib/ResourceLoader.h ../src/camera.h .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/main.cpp ../src/mainwindow.cpp ../src/view.cpp ../src/lib/ResourceLoader.cpp ../src/camera.cpp .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.ui .tmp/final1.0.0/ && (cd `dirname .tmp/final1.0.0` && $(TAR) final1.0.0.tar final1.0.0 && $(COMPRESS) final1.0.0.tar) && $(MOVE) `dirname .tmp/final1.0.0`/final1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/final1.0.0
 
 
 clean:compiler_clean 
@@ -1348,6 +1350,9 @@ ResourceLoader.o: ../src/lib/ResourceLoader.cpp ../src/lib/ResourceLoader.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qstringmatcher.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qshareddata.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ResourceLoader.o ../src/lib/ResourceLoader.cpp
+
+camera.o: ../src/camera.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o ../src/camera.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp

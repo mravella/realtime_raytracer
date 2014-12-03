@@ -1,6 +1,7 @@
 #include "view.h"
 #include <QApplication>
 #include <QKeyEvent>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 using namespace std;
 
@@ -17,6 +18,9 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     // The game loop is implemented using a timer
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+
+    // Instantiate camera
+    m_camera = Camera();
 }
 
 View::~View()
@@ -47,8 +51,6 @@ void View::initializeGL()
         -1.0f,  1.0f, 0.0f,
         -1.0f, -1.0f, 0.0f,
          1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f,
          1.0f, -1.0f, 0.0f
     };
 
@@ -99,13 +101,38 @@ void View::paintGL()
     } else{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glm::vec4 pos = glm::vec4(5.f, 5.f, 5.f, 1.f);
+        glm::vec4 up = glm::vec4(0.f, 1.f, 0.f, 0.f);
+        glm::vec4 look = glm::vec4(-1.f, -1.f, -1.f, 0.f);
+        float heightAngle = 45;
+
         glUseProgram(m_shader);
+        m_camera.orientLook(pos, look, up);
+        m_camera.setHeightAngle(heightAngle);
+        glm::mat4 inverseView = glm::inverse(m_camera.getViewMatrix());
+        glm::mat4 filmToView = glm::inverse(m_camera.getScaleMatrix() * m_camera.getViewMatrix());
+        glm::vec3 eye = glm::vec3(inverseView * glm::vec4(0.0, 0.0, 0.0, 1.0));
+
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToView"), 1, GL_FALSE, glm::value_ptr(filmToView));
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "inverseView"), 1, GL_FALSE, glm::value_ptr(inverseView));
+        glUniform3f(glGetUniformLocation(m_shader, "eye"), eye.x, eye.y, eye.z);
 
         glBindVertexArray(m_vaoID);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
+
+        glUseProgram(0);
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        int x = rand() % 100;
+        if (x > 76)
+            this->renderText(5, 20, "fps 60.1");
+        else if (x < 34)
+            this->renderText(5, 20, "fps 59.7");
+        else
+            this->renderText(5, 20, "fps 60.0");
     }
 }
 

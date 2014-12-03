@@ -3,16 +3,19 @@
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 2
+#define NUM_OBJS 1
 #define NUM_LIGHTS 1
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
-#define kA 0.2
+#define kA 0.5
 #define kD 0.5
 #define kS 0.5
 
 out vec4 outColor;
 uniform float width;
 uniform float height;
+uniform mat4 filmToWorld;
+uniform mat4 inverseView;
+uniform vec3 eye;
 
 float hit = 0.0;
 
@@ -25,7 +28,7 @@ struct lighting
 struct obj
 {
     vec3 ca;
-        vec3 cd;
+    vec3 cd;
     vec3 cs;
     mat4 xform;
     int type;
@@ -96,8 +99,8 @@ isect intersectObjs(vec3 ro, vec3 rd)
     float currT;
     for (int i = 0; i < NUM_OBJS; i++)
     {
-        vec3 p = vec3(objs[i].xform * vec4(ro, 1.0));
-        vec3 d = vec3(objs[i].xform * vec4(rd, 0.0));
+        vec3 p = vec3(inverse(objs[i].xform) * vec4(ro, 1.0));
+        vec3 d = vec3(inverse(objs[i].xform) * vec4(rd, 0.0));
 
         currT = intersectSphere(p, d);
         if ((currT < minT && currT != -1.0) || (currT > minT && minT == -1.0))
@@ -140,20 +143,38 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
 
 void init()
 {
-    objs[0].ca = vec3(0.3, 0.0, 0.4);
-    objs[0].cd = vec3(0.3, 0.0, 0.4);
-    objs[0].cs = vec3(0.3, 0.0, 0.4);
-    objs[0].xform = mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, 1.0, 0.0,
+//    objs[0].ca = vec3(0.3, 0.0, 0.4);
+//    objs[0].cd = vec3(0.3, 0.0, 0.4);
+//    objs[0].cs = vec3(0.3, 0.0, 0.4);
+//    objs[0].xform = mat4(1.2, 0.0, 0.0, 0.0,
+//                         0.0, 1.2, 0.0, 0.0,
+//                         0.0, 0.0, 1.2, 0.0,
+//                         0.0, 0.0, 0.0, 1.0);
+//    objs[0].type = 1;
+//    objs[0].shininess = 30.0;
+
+    objs[0].ca = vec3(0.0, 0.0, 0.0);
+    objs[0].cd = vec3(0.0, 0.0, 1.0);
+    objs[0].cs = vec3(1.0, 1.0, 1.0);
+    objs[0].xform = mat4(0.25, 0.0, 0.0, 0.0,
+                         0.0, 0.25, 0.0, 0.0,
+                         0.0, 0.0, 0.25, 0.0,
                          0.0, 0.0, 0.0, 1.0);
     objs[0].type = 1;
-    objs[0].shininess = 30.0;
+    objs[0].shininess = 25.0;
 
+
+//    lights[0].color = vec3(1.0, 1.0, 1.0);
+//    lights[0].function = vec3(0.5, 0.0, 0.0);
+//    lights[0].pos = vec3(3.0, 3.0, -3.0);
 
     lights[0].color = vec3(1.0, 1.0, 1.0);
-    lights[0].function = vec3(0.5, 0.0, 0.0);
+    lights[0].function = vec3(0.0, 0.0, 0.0);
     lights[0].pos = vec3(3.0, 3.0, -3.0);
+
+//    lights[1].color = vec3(1.0, 1.0, 1.0);
+//    lights[1].function = vec3(1.5, 0.0, 0.0);
+//    lights[1].pos = vec3(-1.0, 1.8, -2.0);
 }
 
 
@@ -164,6 +185,10 @@ void main(void)
     vec3 ro = vec3(0.0, 0.0, 1.0);
     vec3 rd = normalize(vec3(uv, -1.0));
 
+//    vec4 film = vec4(((2.0 * gl_FragCoord.x) / width) - 1.0, 1.0 - ((2.0 * gl_FragCoord.y) / height), -1.0, 1.0);
+//    vec4 world = filmToWorld * film;
+//    vec3 rd = normalize(vec3(world) - eye);
+//    vec3 ro = eye;
 
     init();
     isect i = intersectObjs(ro, rd);

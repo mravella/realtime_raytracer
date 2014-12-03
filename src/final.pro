@@ -19,11 +19,13 @@ DEPENDPATH += glm lib shaders
 SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
-    lib/ResourceLoader.cpp
+    lib/ResourceLoader.cpp \
+    camera.cpp
 
 HEADERS += mainwindow.h \
     view.h \
-    lib/ResourceLoader.h
+    lib/ResourceLoader.h \
+    camera.h
 
 OTHER_FILES += \
     shaders/shader.frag \

@@ -6,6 +6,7 @@
 #include <QTime>
 #include <QTimer>
 #include "ResourceLoader.h"
+#include "camera.h"
 
 class View : public QGLWidget
 {
@@ -33,6 +34,8 @@ private:
     GLuint m_shader;
     GLuint m_vaoID;
     bool m_isInitialized;
+
+    Camera m_camera;
 
 private slots:
     void tick();
