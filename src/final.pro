@@ -4,7 +4,7 @@ TARGET = final
 TEMPLATE = app
 
 # If you add your own folders, add them to INCLUDEPATH and DEPENDPATH, e.g.
-INCLUDEPATH += glm lib
+INCLUDEPATH += glm lib shaders
 DEPENDPATH += glm lib
 
 SOURCES += main.cpp \
@@ -15,6 +15,10 @@ SOURCES += main.cpp \
 HEADERS += mainwindow.h \
     view.h \
     lib/ResourceLoader.h
+
+OTHER_FILES += \
+    shaders/shader.frag \
+    shaders/shader.vert
 
 FORMS += mainwindow.ui
 

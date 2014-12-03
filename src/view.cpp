@@ -1,6 +1,7 @@
 #include "view.h"
 #include <QApplication>
 #include <QKeyEvent>
+#include <iostream>
 
 View::View(QWidget *parent) : QGLWidget(parent)
 {
@@ -26,6 +27,63 @@ void View::initializeGL()
     // All OpenGL initialization *MUST* be done during or after this
     // method. Before this method is called, there is no active OpenGL
     // context and all OpenGL calls have no effect.
+    glewExperimental = GL_TRUE;
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      /* Problem: glewInit failed, something is seriously wrong. */
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+    fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+
+    m_isInitialized = true;
+
+    // Load the shader
+    m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+
+    GLfloat vertexBufferData[] = {
+        -1.0f,  1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f
+    };
+
+    // VAO init
+    glGenVertexArrays(1, &m_vaoID);
+    glBindVertexArray(m_vaoID);
+
+    // Vertex buffer init
+    GLuint vertexBuffer;
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+
+    // Give our vertices to OpenGL.
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexBufferData), vertexBufferData, GL_STATIC_DRAW);
+
+    // Expose vertices to shader
+    glEnableVertexAttribArray(glGetAttribLocation(m_shader, "position"));
+    glVertexAttribPointer(
+       glGetAttribLocation(m_shader, "position"),
+       4,                  // num vertices per element (3 for triangle)
+       GL_FLOAT,           // type
+       GL_FALSE,           // normalized?
+       0,                  // stride
+       (void*)0            // array buffer offset
+    );
+
+    glEnableVertexAttribArray(glGetAttribLocation(m_shader, "normal"));
+    glVertexAttribPointer(
+       glGetAttribLocation(m_shader, "normal"),
+       4,                  // num vertices per element (3 for triangle)
+       GL_FLOAT,           // type
+       GL_TRUE,           // normalized?
+       0,                  // stride
+       (void*)0            // array buffer offset
+    );
+
+    //Clean up -- unbind things
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+    glBindVertexArray(0);
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -45,6 +103,22 @@ void View::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // TODO: Implement the demo rendering here
+
+    if (!m_isInitialized){
+        std::cout << "You must call init() before you can draw!" << std::endl;
+    } else{
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(m_shader);
+        glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
+//        glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &sphereTransform.getTransform()[0][0]);
+//        glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &sphereTransform.model[0][0]);
+//        glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &sphereTransform.view[0][0]);
+
+        glBindVertexArray(m_vaoID);
+        glDrawArrays(GL_QUADS, 0, 1);
+        glBindVertexArray(0);
+    }
 }
 
 void View::resizeGL(int w, int h)
