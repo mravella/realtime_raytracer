@@ -1,11 +1,8 @@
-#version 120
+#version 330
 
-attribute vec3 position;
-//out vec2 textureCoord;
-
+in vec3 position;
 
 void main() 
 {
-//    outPos = position;
     gl_Position = vec4(position, 1.0);
 }

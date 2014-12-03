@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 #include <iostream>
+using namespace std;
 
 View::View(QWidget *parent) : QGLWidget(parent)
 {
@@ -39,14 +40,16 @@ void View::initializeGL()
     m_isInitialized = true;
 
     // Load the shader
-    m_shader = ResourceLoader::loadShaders("/Users/mravella/Documents/course/cs123_final/src/shaders/shader.vert", "/Users/mravella/Documents/course/cs123_final/src/shaders/shader.frag");
+    m_shader = ResourceLoader::loadShaders("/gpfs/main/home/mravella/course/cs123_final/src/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/shader.frag");
     std::cout << "Version: " << (char *) glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
     GLfloat vertexBufferData[] = {
         -1.0f,  1.0f, 0.0f,
         -1.0f, -1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f
+         1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+         1.0f, -1.0f, 0.0f
     };
 
     // VAO init
@@ -65,19 +68,9 @@ void View::initializeGL()
     glEnableVertexAttribArray(glGetAttribLocation(m_shader, "position"));
     glVertexAttribPointer(
        glGetAttribLocation(m_shader, "position"),
-       4,                  // num vertices per element (3 for triangle)
+       3,                  // num vertices per element (3 for triangle)
        GL_FLOAT,           // type
        GL_FALSE,           // normalized?
-       0,                  // stride
-       (void*)0            // array buffer offset
-    );
-
-    glEnableVertexAttribArray(glGetAttribLocation(m_shader, "normal"));
-    glVertexAttribPointer(
-       glGetAttribLocation(m_shader, "normal"),
-       4,                  // num vertices per element (3 for triangle)
-       GL_FLOAT,           // type
-       GL_TRUE,           // normalized?
        0,                  // stride
        (void*)0            // array buffer offset
     );
@@ -101,23 +94,17 @@ void View::initializeGL()
 
 void View::paintGL()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // TODO: Implement the demo rendering here
-
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(m_shader);
-        glUniform3f(glGetUniformLocation(m_shader, "color"), 1, 0, 0);
-//        glUniformMatrix4fv(glGetUniformLocation(m_shader, "mvp"), 1, GL_FALSE, &sphereTransform.getTransform()[0][0]);
-//        glUniformMatrix4fv(glGetUniformLocation(m_shader, "m"), 1, GL_FALSE, &sphereTransform.model[0][0]);
-//        glUniformMatrix4fv(glGetUniformLocation(m_shader, "v"), 1, GL_FALSE, &sphereTransform.view[0][0]);
+        glUniform1f(glGetUniformLocation(m_shader, "width"), width());
+        glUniform1f(glGetUniformLocation(m_shader, "height"), height());
 
         glBindVertexArray(m_vaoID);
-        glDrawArrays(GL_QUADS, 0, 1);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
     }
 }
