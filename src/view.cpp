@@ -39,7 +39,8 @@ void View::initializeGL()
     m_isInitialized = true;
 
     // Load the shader
-    m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+    m_shader = ResourceLoader::loadShaders("/Users/mravella/Documents/course/cs123_final/src/shaders/shader.vert", "/Users/mravella/Documents/course/cs123_final/src/shaders/shader.frag");
+    std::cout << "Version: " << (char *) glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
     GLfloat vertexBufferData[] = {
         -1.0f,  1.0f, 0.0f,

@@ -1,6 +1,7 @@
 #include "ResourceLoader.h"
 #include <QFile>
 #include <QTextStream>
+#include <iostream>
 
 ResourceLoader::ResourceLoader()
 {
@@ -20,6 +21,8 @@ GLuint ResourceLoader::loadShaders(const char * vertex_file_path,const char * fr
         QTextStream vertStream(&vertFile);
         VertexShaderCode = vertStream.readAll().toStdString();
     }
+
+    std::cout << "VertexShaderCode: " << VertexShaderCode << std::endl;
 
     // Read fragment shader code from file
     std::string FragmentShaderCode;

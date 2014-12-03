@@ -1,10 +1,8 @@
-#version 330 core
+#version 120
 
-in vec3 outPos;
-
-out vec4 outColor;
+//attribute vec3 outPos;
 
 void main()
 {
-    outColor = vec4(outPos, 1.0);
+    gl_FragColor = vec4(0.4, 0.0, 0.4, 1.0);
 }
