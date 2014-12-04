@@ -105,15 +105,14 @@ void View::paintGL()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Defaults
-        glm::vec4 pos = glm::vec4(5.f, 5.f, 5.f, 1.f);
+        glm::vec4 pos = glm::vec4(0.f, 0.f, 3.f, 1.f);
         glm::vec4 up = glm::vec4(0.f, 1.f, 0.f, 0.f);
-        glm::vec4 look = glm::vec4(-1.f, -1.f, -1.f, 0.f);
+        glm::vec4 look = glm::vec4(0.f, 0.f, -1.f, 0.f);
         float heightAngle = 45;
 
         glUseProgram(m_shader);
         m_camera.orientLook(pos, look, up);
         m_camera.setHeightAngle(heightAngle);
-        m_camera.setAspectRatio(width() / height());
 
         glm::mat4 viewMatrix = m_camera.getViewMatrix();
         glm::vec3 eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
@@ -153,6 +152,7 @@ void View::paintGL()
 void View::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
+    m_camera.setAspectRatio((float) width() / (float) height());
 }
 
 void View::mousePressEvent(QMouseEvent *event)

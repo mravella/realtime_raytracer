@@ -93,7 +93,6 @@ vec3 getSphereNormal(vec3 pos)
 
 isect intersectObjs(vec3 ro, vec3 rd)
 {
-    isect i;
     i.t = -1.0;
     float minT = -1.0;
     obj minObj;
@@ -126,7 +125,7 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
         vec3 lightDir = normalize(vertToLight);
         float dist = sqrt(vertToLight.x * vertToLight.x + vertToLight.y * vertToLight.y + vertToLight.z * vertToLight.z);
 
-        vec3 reflectionVec = normalize(reflect(-lightDir, norm));
+        vec3 reflectionVec = normalize(reflect(lightDir, norm));
         vec3 posAug = pos + (norm / 1000.0);
 
         float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
@@ -170,7 +169,7 @@ void init()
 
     lights[0].color = vec3(1.0, 1.0, 1.0);
     lights[0].function = vec3(0.0, 0.0, 0.0);
-    lights[0].pos = vec3(3.0, 3.0, -3.0);
+    lights[0].pos = vec3(3.0, 3.0, 3.0);
 
 //    lights[1].color = vec3(1.0, 1.0, 1.0);
 //    lights[1].function = vec3(1.5, 0.0, 0.0);
@@ -181,8 +180,8 @@ void init()
 void main(void)
 {
 //    vec2 uv = (-1.0 + 2.0*gl_FragCoord.xy / vec2(width, height)) * vec2(width/height, 1.0);
-//    vec3 ro = vec3(0.0, 0.0, 1.0);
-//    vec3 rd = normalize(vec3(uv, -1.0));
+//    vec3 ro = vec3(0.0, 0.0, 5.0);
+//    vec3 rd = normalize(vec3(uv, -5.0));
     if (settings == 2) {
         outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
         return;
@@ -201,9 +200,11 @@ void main(void)
 
     vec4 film = vec4(((2.0 * x) / width) - 1.0, 1.0 - ((2.0 * y) / height), -1.0, 1.0);
     vec4 world = filmToWorld * film;
-    vec3 rd = normalize(world.xyz - eye);
+    vec3 rd = normalize(world.xyz / world.w - eye);
     vec3 ro = eye;
 
+//    outColor = vec4(-rd.xyz, 1.0);
+//    return;
 
     init();
     i = intersectObjs(ro, rd);
@@ -213,7 +214,7 @@ void main(void)
         return;
     }
 
-    vec3 worldPos = ro * i.t + rd;
+    vec3 worldPos = rd * i.t + ro;
 
     vec3 norm = getSphereNormal(worldPos);
 

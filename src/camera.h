@@ -71,17 +71,19 @@ public:
     // Sets the near and far clip planes for this camera.
     void setClip(float nearPlane, float farPlane);
 
-    void updateProjection(void);
+    void updateCameraAxes();
 
-    void updateView(void);
-
-    int getType() {return 1;};
 
 protected:
 
     glm::mat4 m_viewMatrix, m_projectionMatrix;
-    glm::vec4 m_look, m_up, m_eye, m_lookAt, m_u, m_v, m_w;
+    glm::vec3 m_look, m_up, m_eye, m_u, m_v, m_w;
     float m_aspect, m_near, m_far, m_height;
+    glm::vec3 m_position;
+    float m_nearClip;
+    float m_heightAngle;
+    float m_aspectRatio;
+    float m_farClip;
 
 };
 
