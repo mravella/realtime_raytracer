@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QList>
+#include "databinding.h"
 
 namespace Ui {
     class MainWindow;
@@ -17,6 +19,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QList<DataBinding *> m_bindings;
+    void dataBind();
 };
 
 #endif // MAINWINDOW_H

@@ -16,6 +16,7 @@ uniform float height;
 uniform mat4 filmToWorld;
 uniform mat4 inverseView;
 uniform vec3 eye;
+uniform int settings;
 
 float hit = 0.0;
 
@@ -99,6 +100,7 @@ isect intersectObjs(vec3 ro, vec3 rd)
     float currT;
     for (int i = 0; i < NUM_OBJS; i++)
     {
+        // Don't take inverses.  Precompute.
         vec3 p = vec3(inverse(objs[i].xform) * vec4(ro, 1.0));
         vec3 d = vec3(inverse(objs[i].xform) * vec4(rd, 0.0));
 
@@ -127,8 +129,6 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
         vec3 reflectionVec = normalize(reflect(-lightDir, norm));
         vec3 posAug = pos + (norm / 1000.0);
 
-
-
         float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
         spec.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.r) / falloff;
         spec.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.g) / falloff;
@@ -156,10 +156,10 @@ void init()
     objs[0].ca = vec3(0.0, 0.0, 0.0);
     objs[0].cd = vec3(0.0, 0.0, 1.0);
     objs[0].cs = vec3(1.0, 1.0, 1.0);
-    objs[0].xform = mat4(0.25, 0.0, 0.0, 0.0,
-                         0.0, 0.25, 0.0, 0.0,
-                         0.0, 0.0, 0.25, 0.0,
-                         0.0, 0.0, 0.0, 1.0);
+    objs[0].xform = mat4(1.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0,
+                         0.0, 0.0,  1.0, 0.0,
+                         0.0, 0.0,  0.0, 1.0);
     objs[0].type = 1;
     objs[0].shininess = 25.0;
 
@@ -178,24 +178,39 @@ void init()
 }
 
 
-
 void main(void)
 {
-    vec2 uv = (-1.0 + 2.0*gl_FragCoord.xy / vec2(width, height)) * vec2(width/height, 1.0);
-    vec3 ro = vec3(0.0, 0.0, 1.0);
-    vec3 rd = normalize(vec3(uv, -1.0));
+//    vec2 uv = (-1.0 + 2.0*gl_FragCoord.xy / vec2(width, height)) * vec2(width/height, 1.0);
+//    vec3 ro = vec3(0.0, 0.0, 1.0);
+//    vec3 rd = normalize(vec3(uv, -1.0));
+    if (settings == 2) {
+        outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
+        return;
+    }
+    if (settings == 3) {
+        outColor = vec4(253.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0, 1.0);
+        return;
+    }
+    if (settings == 4) {
+        outColor = vec4(89.0 / 255.0, 122.0 / 255.0, 94.0 / 255.0, 1.0);
+        return;
+    }
 
-//    vec4 film = vec4(((2.0 * gl_FragCoord.x) / width) - 1.0, 1.0 - ((2.0 * gl_FragCoord.y) / height), -1.0, 1.0);
-//    vec4 world = filmToWorld * film;
-//    vec3 rd = normalize(vec3(world) - eye);
-//    vec3 ro = eye;
+    float x = gl_FragCoord.x;
+    float y = height - gl_FragCoord.y;
+
+    vec4 film = vec4(((2.0 * x) / width) - 1.0, 1.0 - ((2.0 * y) / height), -1.0, 1.0);
+    vec4 world = filmToWorld * film;
+    vec3 rd = normalize(world.xyz - eye);
+    vec3 ro = eye;
+
 
     init();
-    isect i = intersectObjs(ro, rd);
+    i = intersectObjs(ro, rd);
 
     if (i.t == -1.0)  {
         outColor = vec4(0.0, 0.0, 0.0, 1.0);
-                return;
+        return;
     }
 
     vec3 worldPos = ro * i.t + rd;
@@ -208,10 +223,11 @@ void main(void)
     vec3 diffuse = l.diffuse;
     vec3 spec = l.spec;
 
-
     diffuse *= kD * i.obj.cd;
     spec *= kS * i.obj.cs;
 
+
     outColor = vec4(ambient + diffuse + spec, 1.0);
+
 }
 

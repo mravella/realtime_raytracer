@@ -11,7 +11,7 @@ Camera::Camera()
 {
     m_aspect = 1.0f;
     m_near = 1.0f;
-    m_far = 30.0f;
+    m_far = 60.0f;
     m_height = M_PI / 6.0f;
     m_viewMatrix = glm::mat4();
     m_projectionMatrix = glm::mat4();
@@ -21,7 +21,7 @@ Camera::Camera()
     m_v = glm::vec4();
     m_w = glm::vec4();
     m_eye = glm::vec4(0.0, 0.0, 0.0, 1.0);
-    this->orientLook(glm::vec4(2.0, 2.0, 2.0, 1.0), glm::vec4(-2.0, -2.0, -2.0, 0.0), glm::vec4(0.0, 1.0, 0.0, 0.0));
+    this->orientLook(glm::vec4(0.5, 0.5, 0.5, 1.0), glm::vec4(-1.0, -1.0, -1.0, 0.0), glm::vec4(0.0, 1.0, 0.0, 0.0));
     this->updateProjection();
 }
 

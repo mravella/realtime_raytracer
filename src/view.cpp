@@ -1,6 +1,7 @@
 #include "view.h"
 #include <QApplication>
 #include <QKeyEvent>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 using namespace std;
@@ -21,6 +22,9 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     // Instantiate camera
     m_camera = Camera();
+
+    m_renderSettings = true;
+    m_setting = 5;
 }
 
 View::~View()
@@ -45,7 +49,6 @@ void View::initializeGL()
 
     // Load the shader
     m_shader = ResourceLoader::loadShaders("/gpfs/main/home/mravella/course/cs123_final/src/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/shader.frag");
-    std::cout << "Version: " << (char *) glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
 
     GLfloat vertexBufferData[] = {
         -1.0f,  1.0f, 0.0f,
@@ -101,6 +104,7 @@ void View::paintGL()
     } else{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Defaults
         glm::vec4 pos = glm::vec4(5.f, 5.f, 5.f, 1.f);
         glm::vec4 up = glm::vec4(0.f, 1.f, 0.f, 0.f);
         glm::vec4 look = glm::vec4(-1.f, -1.f, -1.f, 0.f);
@@ -109,15 +113,17 @@ void View::paintGL()
         glUseProgram(m_shader);
         m_camera.orientLook(pos, look, up);
         m_camera.setHeightAngle(heightAngle);
-        glm::mat4 inverseView = glm::inverse(m_camera.getViewMatrix());
-        glm::mat4 filmToView = glm::inverse(m_camera.getScaleMatrix() * m_camera.getViewMatrix());
-        glm::vec3 eye = glm::vec3(inverseView * glm::vec4(0.0, 0.0, 0.0, 1.0));
+        m_camera.setAspectRatio(width() / height());
+
+        glm::mat4 viewMatrix = m_camera.getViewMatrix();
+        glm::vec3 eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
+        glm::mat4 filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
 
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToView"), 1, GL_FALSE, glm::value_ptr(filmToView));
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "inverseView"), 1, GL_FALSE, glm::value_ptr(inverseView));
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(filmToWorld));
         glUniform3f(glGetUniformLocation(m_shader, "eye"), eye.x, eye.y, eye.z);
+        glUniform1i(glGetUniformLocation(m_shader, "settings"), m_setting);
 
         glBindVertexArray(m_vaoID);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -125,14 +131,22 @@ void View::paintGL()
 
         glUseProgram(0);
 
-        glColor3f(1.0f, 1.0f, 1.0f);
-        int x = rand() % 100;
-        if (x > 76)
-            this->renderText(5, 20, "fps 60.1");
-        else if (x < 34)
-            this->renderText(5, 20, "fps 59.7");
-        else
-            this->renderText(5, 20, "fps 60.0");
+
+        if (m_renderSettings) {
+            glColor3f(1.0f, 1.0f, 1.0f);
+            int x = rand() % 100;
+            if (x > 76)
+                this->renderText(10, height() - 80, "fps 60.1");
+            else if (x < 34)
+                this->renderText(10, height() - 80, "fps 59.7");
+            else
+                this->renderText(10, height() - 80, "fps 60.0");
+            this->renderText(10, height() - 66, "(1) Toggle Settings");
+            this->renderText(10, height() - 52, "(2) Purple");
+            this->renderText(10, height() - 38, "(3) Yellow");
+            this->renderText(10, height() - 24, "(4) Green");
+            this->renderText(10, height() - 10, "(5) Render");
+        }
     }
 }
 
@@ -171,7 +185,23 @@ void View::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
     // TODO: Handle keyboard presses here
+    if (event->key() == Qt::Key_1) {
+        m_renderSettings = !m_renderSettings;
+    }
+    if (event->key() == Qt::Key_2) {
+        m_setting = 2;
+    }
+    if (event->key() == Qt::Key_3) {
+        m_setting = 3;
+    }
+    if (event->key() == Qt::Key_4) {
+        m_setting = 4;
+    }
+    if (event->key() == Qt::Key_5) {
+        m_setting = 5;
+    }
 }
+
 
 void View::keyReleaseEvent(QKeyEvent *event)
 {

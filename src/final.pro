@@ -20,12 +20,14 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
     lib/ResourceLoader.cpp \
-    camera.cpp
+    camera.cpp \
+    databinding.cpp
 
 HEADERS += mainwindow.h \
     view.h \
     lib/ResourceLoader.h \
-    camera.h
+    camera.h \
+    databinding.h
 
 OTHER_FILES += \
     shaders/shader.frag \
@@ -37,7 +39,6 @@ macx {
     QMAKE_CXXFLAGS_WARN_ON -= -Warray-bounds -Wc++0x-compat
 }
 
-#TODO (Windows): If you are setting up local development on Windows (NOT Mac), comment out the following lines
 win32:CONFIG(release, debug|release): LIBS += -L/course/cs123/lib/glew/glew-1.10.0/lib/release/ -lGLEW
 else:win32:CONFIG(debug, debug|release): LIBS += -L/course/cs123/lib/glew/glew-1.10.0/lib/debug/ -lGLEW
 else:unix: LIBS += -L/usr/local/Cellar/glew/1.11.0/lib/ -lGLEW

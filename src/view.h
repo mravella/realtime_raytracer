@@ -35,6 +35,9 @@ private:
     GLuint m_vaoID;
     bool m_isInitialized;
 
+    bool m_renderSettings;
+    int  m_setting;
+
     Camera m_camera;
 
 private slots:
