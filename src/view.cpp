@@ -136,11 +136,11 @@ void View::paintGL()
             glColor3f(1.0f, 1.0f, 1.0f);
             int x = rand() % 100;
             if (x > 76)
-                this->renderText(10, height() - 80, "fps 60.1");
+                this->renderText(10, 18, "fps 60.1");
             else if (x < 34)
-                this->renderText(10, height() - 80, "fps 59.7");
+                this->renderText(10, 18, "fps 59.7");
             else
-                this->renderText(10, height() - 80, "fps 60.0");
+                this->renderText(10, 18, "fps 60.0");
             this->renderText(10, height() - 66, "(1) Toggle Settings");
             this->renderText(10, height() - 52, "(2) Purple");
             this->renderText(10, height() - 38, "(3) Yellow");
