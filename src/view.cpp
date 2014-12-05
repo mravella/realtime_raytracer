@@ -31,6 +31,8 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_up = glm::vec4(0.f, 1.f, 0.f, 0.f);
     m_look = glm::vec4(-9.f, -3.2f, -16.f, 0.f);
     m_heightAngle = 45;
+    m_count = 0;
+
 }
 
 View::~View()
@@ -90,6 +92,13 @@ void View::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER,0);
     glBindVertexArray(0);
 
+
+    m_textureId = loadTexture("/course/cs123/data/image/BoneHead.jpg");
+    if (m_textureId == -1)
+        cout << "Texture does not exist" << endl;
+
+    cout << "Texture Id: " << m_textureId + 0 << endl;
+
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
     time.start();
@@ -112,6 +121,7 @@ void View::paintGL()
 
         glUseProgram(m_shader);
 
+
         m_camera.orientLook(m_pos, m_look, m_up);
         m_camera.setHeightAngle(m_heightAngle);
 
@@ -119,16 +129,22 @@ void View::paintGL()
         m_eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
         m_filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_textureId);
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
         glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
         glUniform1i(glGetUniformLocation(m_shader, "settings"), m_setting);
+        glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
+        glUniform1i(glGetUniformLocation(m_shader, "textureSampler"), 0);
+
 
         glBindVertexArray(m_vaoID);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
+        glBindTexture(GL_TEXTURE_2D, 0);
         glUseProgram(0);
 
 
@@ -227,4 +243,38 @@ void View::tick()
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
     update();
+}
+
+int View::loadTexture(const QString &filename)
+{
+    // Make sure the image file exists
+    QFile file(filename);
+    if (!file.exists())
+        return -1;
+
+    // Load the file into memory
+    QImage image;
+    image.load(file.fileName());
+    image = image.mirrored(false, true);
+    QImage texture = QGLWidget::convertToGLFormat(image);
+
+    // Generate a new OpenGL texture ID to put our image into
+    GLuint id = 0;
+    glGenTextures(1, &id);
+
+    // Make the texture we just created the new active texture
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    // Copy the image data into the OpenGL texture
+    gluBuild2DMipmaps(GL_TEXTURE_2D, 3, texture.width(), texture.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+
+    // Set filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Set coordinate wrapping options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    return id;
 }

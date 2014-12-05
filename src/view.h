@@ -5,6 +5,7 @@
 #include <qgl.h>
 #include <QTime>
 #include <QTimer>
+#include <QString>
 #include "ResourceLoader.h"
 #include "camera.h"
 
@@ -31,6 +32,8 @@ private:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
 
+    int loadTexture(const QString &filename);
+
     GLuint m_shader;
     GLuint m_vaoID;
     bool m_isInitialized;
@@ -43,6 +46,8 @@ private:
     Camera m_camera;
     glm::vec4 m_pos, m_look, m_up;
     float m_heightAngle;
+    int m_count;
+    int m_textureId;
 
 private slots:
     void tick();

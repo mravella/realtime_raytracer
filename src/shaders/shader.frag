@@ -18,6 +18,8 @@ uniform mat4 filmToWorld;
 uniform mat4 inverseView;
 uniform vec3 eye;
 uniform int settings;
+uniform float time;
+uniform sampler2D textureSampler;
 
 struct lighting
 {
@@ -32,6 +34,7 @@ struct obj
     vec3 cs;
     vec3 cr;
     mat4 xform;
+    bool useTexture;
     int type;
     float shininess;
 } objs[NUM_OBJS];
@@ -49,6 +52,7 @@ struct isect
     vec3 pos;
     vec3 norm;
     obj obj;
+    vec2 tex;
 } i;
 
 float smallestPos(float a, float b)
@@ -88,16 +92,6 @@ float intersectSphere(vec3 ro, vec3 rd)
     return quadratic(a, b, c);
 }
 
-vec3 getSphereNormal(vec3 pos)
-{
-    return normalize(pos);
-}
-
-float intersectPlane(vec3 ro, vec3 rd, vec3 pt, vec3 n)
-{
-    return ((dot(n, pt) - dot(n, ro)) / (dot(n, rd)));
-}
-
 isect intersectObjs(vec3 ro, vec3 rd)
 {
     i.t = -1.0;
@@ -124,6 +118,7 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.obj = minObj;
     i.pos = minPos;
     i.norm = normalize(minPos);
+    i.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
     return i;
 }
 
@@ -160,10 +155,14 @@ void init()
     objs[0].cd = vec3(0.75, 1.0, 0.75);
     objs[0].cs = vec3(1.0, 1.0, 1.0);
     objs[0].cr = vec3(0.5, 0.5, 0.5);
+    objs[0].useTexture = true;
     objs[0].xform = mat4(6.0, 0.0, 0.0, 0.0,
                          0.0, 6.0, 0.0, 0.0,
                          0.0, 0.0, 6.0, 0.0,
-                         0.0, 0.0, 0.0, 1.0);
+                         0.0, 0.0, 0.0, 1.0) * mat4(cos(radians(time)), 0.0, -sin(radians(time)), 0.0,
+                                                    0.0,                1.0,                 0.0, 0.0,
+                                                    sin(radians(time)), 0.0,  cos(radians(time)), 0.0,
+                                                    0.0,                0.0,                 0.0, 1.0);
     objs[0].type = 1;
     objs[0].shininess = 50.0;
 
@@ -171,10 +170,11 @@ void init()
     objs[1].cd = vec3(1.0, 0.75, 0.75);
     objs[1].cs = vec3(1.0, 1.0, 1.0);
     objs[1].cr = vec3(0.5, 0.5, 0.5);
+    objs[1].useTexture = false;
     objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         4.5, 0.0,  0.0, 1.0);
+                         4.5, 3.0 * sin(time / 50.0),  0.0, 1.0);
     objs[1].type = 1;
     objs[1].shininess = 50.0;
 
@@ -182,10 +182,11 @@ void init()
     objs[2].cd = vec3(1.0, 0.75, 0.75);
     objs[2].cs = vec3(1.0, 1.0, 1.0);
     objs[2].cr = vec3(0.5, 0.5, 0.5);
+    objs[2].useTexture = false;
     objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         -4.5, 0.0,  0.0, 1.0);
+                         -4.5, -3.0 * sin(time / 50.0),  0.0, 1.0);
     objs[2].type = 1;
     objs[2].shininess = 50.0;
 
@@ -193,10 +194,11 @@ void init()
     objs[3].cd = vec3(1.0, 0.75, 0.75);
     objs[3].cs = vec3(1.0, 1.0, 1.0);
     objs[3].cr = vec3(0.5, 0.5, 0.5);
+    objs[3].useTexture = false;
     objs[3].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, 4.5,  0.0, 1.0);
+                         3.0 * cos(time / 50.0), 4.5,  0.0, 1.0);
     objs[3].type = 1;
     objs[3].shininess = 50.0;
 
@@ -204,10 +206,11 @@ void init()
     objs[4].cd = vec3(1.0, 0.75, 0.75);
     objs[4].cs = vec3(1.0, 1.0, 1.0);
     objs[4].cr = vec3(0.5, 0.5, 0.5);
+    objs[4].useTexture = false;
     objs[4].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, -4.5,  0.0, 1.0);
+                         -3.0 * cos(time / 50.0), -4.5,  0.0, 1.0);
     objs[4].type = 1;
     objs[4].shininess = 50.0;
 
@@ -215,10 +218,11 @@ void init()
     objs[5].cd = vec3(1.0, 0.75, 0.75);
     objs[5].cs = vec3(1.0, 1.0, 1.0);
     objs[5].cr = vec3(0.5, 0.5, 0.5);
+    objs[5].useTexture = false;
     objs[5].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, 0.0,  4.5, 1.0);
+                         0.0, 3.0 * sin(time / 50.0),  4.5, 1.0);
     objs[5].type = 1;
     objs[5].shininess = 50.0;
 
@@ -226,10 +230,11 @@ void init()
     objs[6].cd = vec3(1.0, 0.75, 0.75);
     objs[6].cs = vec3(1.0, 1.0, 1.0);
     objs[6].cr = vec3(0.5, 0.5, 0.5);
+    objs[6].useTexture = false;
     objs[6].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, 0.0,  -4.5, 1.0);
+                         0.0, -3.0 * cos(time / 50.0),  -4.5, 1.0);
     objs[6].type = 1;
     objs[6].shininess = 50.0;
 
@@ -262,9 +267,16 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
         res.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.r * o.obj.cs.r * kS) / falloff;
         res.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.g * o.obj.cs.g * kS) / falloff;
         res.b += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.b * o.obj.cs.b * kS) / falloff;
-        res.r += max(0.0, dot(o.norm, lightDir) * lights[j].color.r * o.obj.cd.r * kD) / falloff;
-        res.g += max(0.0, dot(o.norm, lightDir) * lights[j].color.g * o.obj.cd.g * kD) / falloff;
-        res.b += max(0.0, dot(o.norm, lightDir) * lights[j].color.b * o.obj.cd.b * kD) / falloff;
+        if (o.obj.useTexture) {
+            res.r += max(0.0, dot(o.norm, lightDir) * lights[j].color.r * texture2D(textureSampler, o.tex).r * kD) / falloff;
+            res.g += max(0.0, dot(o.norm, lightDir) * lights[j].color.g * texture2D(textureSampler, o.tex).g * kD) / falloff;
+            res.b += max(0.0, dot(o.norm, lightDir) * lights[j].color.b * texture2D(textureSampler, o.tex).b * kD) / falloff;
+        }
+        else {
+            res.r += max(0.0, dot(o.norm, lightDir) * lights[j].color.r * o.obj.cd.r * kD) / falloff;
+            res.g += max(0.0, dot(o.norm, lightDir) * lights[j].color.g * o.obj.cd.g * kD) / falloff;
+            res.b += max(0.0, dot(o.norm, lightDir) * lights[j].color.b * o.obj.cd.b * kD) / falloff;
+        }
 
     }
     return res;
@@ -281,10 +293,6 @@ void main(void)
         outColor = vec4(253.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0, 1.0);
         return;
     }
-    // if (settings == 4) {
-    //     outColor = vec4(89.0 / 255.0, 122.0 / 255.0, 94.0 / 255.0, 1.0);
-    //     return;
-    // }
 
     float x = gl_FragCoord.x;
     float y = height - gl_FragCoord.y;
@@ -311,15 +319,16 @@ void main(void)
         }
 
         vec3 worldPos = rd * i.t + ro;
+        // Fix Spec & maybe do less matrix operations for the speed
+        i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
         res += spec * calculateLighting(worldPos, rd, i);
         spec *= i.obj.cr;
 
-        // Maybe less matrix operations
-        rd = reflect(rd, normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm));
+        rd = reflect(rd, i.norm);
         ro = worldPos + (rd / 1000.0);
     }
 
     outColor = vec4(res, 1.0);
-
+    // outColor = vec4(texture2D(textureSampler, vec2(x, y) / height).rgb, 1.0);
 }
 
