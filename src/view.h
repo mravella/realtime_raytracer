@@ -48,6 +48,7 @@ private:
     float m_heightAngle;
     int m_count;
     int m_textureId;
+    int m_bg;
 
 private slots:
     void tick();

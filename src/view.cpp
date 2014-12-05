@@ -93,11 +93,14 @@ void View::initializeGL()
     glBindVertexArray(0);
 
 
-    m_textureId = loadTexture("/course/cs123/data/image/BoneHead.jpg");
+    m_textureId = loadTexture("/course/cs123/data/image/biker.jpg");
     if (m_textureId == -1)
         cout << "Texture does not exist" << endl;
 
-    cout << "Texture Id: " << m_textureId + 0 << endl;
+    m_bg = loadTexture("/course/cs123/data/image/boat.jpg");
+    if (m_bg == -1)
+        cout << "Texure does not exist" << endl;
+
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -131,6 +134,8 @@ void View::paintGL()
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_textureId);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_bg);
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
@@ -138,6 +143,7 @@ void View::paintGL()
         glUniform1i(glGetUniformLocation(m_shader, "settings"), m_setting);
         glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
         glUniform1i(glGetUniformLocation(m_shader, "textureSampler"), 0);
+        glUniform1i(glGetUniformLocation(m_shader, "bg"), 1);
 
 
         glBindVertexArray(m_vaoID);
@@ -273,8 +279,8 @@ int View::loadTexture(const QString &filename)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Set coordinate wrapping options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
     return id;
 }

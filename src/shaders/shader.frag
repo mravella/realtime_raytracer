@@ -20,6 +20,7 @@ uniform vec3 eye;
 uniform int settings;
 uniform float time;
 uniform sampler2D textureSampler;
+uniform sampler2D bg;
 
 struct lighting
 {
@@ -315,6 +316,10 @@ void main(void)
         i = intersectObjs(ro, rd);
 
         if (i.t == -1.0) {
+            if (j == 0) {
+                outColor = vec4(texture2D(bg, vec2(x / height, y / height)).rgb, 1.0);
+                return;
+            }
             break;
         }
 
