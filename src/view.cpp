@@ -122,8 +122,14 @@ void View::paintGL()
     } else{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
         glUseProgram(m_shader);
 
+
+//        m_pos = glm::vec4(-6.0f, 4.0f, 4.0f, 1.f);
+//        m_up = glm::vec4(0.f, 1.f, 0.f, 0.f);
+//        m_look = glm::vec4(6.f, -4.f, -4.f, 0.f);
+//        m_heightAngle = 30;
 
         m_camera.orientLook(m_pos, m_look, m_up);
         m_camera.setHeightAngle(m_heightAngle);
@@ -165,9 +171,9 @@ void View::paintGL()
                 this->renderText(10, 18, "fps 60.0");
             this->renderText(10, height() - 66, "(1) Toggle Settings");
             this->renderText(10, height() - 52, "(2) Purple");
-            this->renderText(10, height() - 38, "(3) Yellow");
-            this->renderText(10, height() - 24, "(4) Green");
-            this->renderText(10, height() - 10, "(5) Render");
+            this->renderText(10, height() - 38, "(3) Light Spheres");
+            this->renderText(10, height() - 24, "(4) No Reflections");
+            this->renderText(10, height() - 10, "(5) Recursive Spheres Animation");
         }
     }
 }
@@ -215,12 +221,14 @@ void View::keyPressEvent(QKeyEvent *event)
         m_setting = 2;
     }
     if (event->key() == Qt::Key_3) {
+        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/grid.frag");
         m_setting = 3;
     }
     if (event->key() == Qt::Key_4) {
         m_setting = 4;
     }
     if (event->key() == Qt::Key_5) {
+        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
         m_setting = 5;
     }
     if (event->key() == Qt::Key_Up) {

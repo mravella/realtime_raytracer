@@ -3,8 +3,8 @@
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 7
-#define NUM_LIGHTS 2
+#define NUM_OBJS 5
+#define NUM_LIGHTS 4
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
 #define kD 0.5
@@ -99,7 +99,7 @@ isect intersectObjs(vec3 ro, vec3 rd)
     float minT = -1.0;
     obj minObj;
     float currT;
-    vec3 minPos;
+    vec3 minPos = vec3(1.0);
     for (int i = 0; i < NUM_OBJS; i++)
     {
         // Don't take inverses.  Precompute.
@@ -123,11 +123,6 @@ isect intersectObjs(vec3 ro, vec3 rd)
     return i;
 }
 
-float isShadow(vec3 pos, light l)
-{
-    return int(!(smallestPos(10000.0, intersectObjs(pos, -l.pos).t) ==  10000.0));
-}
-
 lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
 {
     vec3 diffuse = vec3(0.0, 0.0, 0.0);
@@ -143,14 +138,13 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
         vec3 posAug = pos + (norm / 1000.0);
 
         // float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
-        int shadow = int(smallestPos(10000.0, intersectObjs(posAug, -lights[i].pos).t) !=  10000.0);
         float falloff = 1.0;
-        spec.r += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.r) / falloff;
-        spec.g += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.g) / falloff;
-        spec.b += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.b) / falloff;
-        diffuse.r += shadow * max(0.0, dot(norm, lightDir) * lights[i].color.r) / falloff;
-        diffuse.g += shadow * max(0.0, dot(norm, lightDir) * lights[i].color.g) / falloff;
-        diffuse.b += shadow * max(0.0, dot(norm, lightDir) * lights[i].color.b) / falloff;
+        spec.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.r) / falloff;
+        spec.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.g) / falloff;
+        spec.b += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.b) / falloff;
+        diffuse.r += max(0.0, dot(norm, lightDir) * lights[i].color.r) / falloff;
+        diffuse.g += max(0.0, dot(norm, lightDir) * lights[i].color.g) / falloff;
+        diffuse.b += max(0.0, dot(norm, lightDir) * lights[i].color.b) / falloff;
 
     }
     return lighting(diffuse, spec);
@@ -158,98 +152,82 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
 
 void init()
 {
-    objs[0].ca = vec3(0.0, 0.0, 0.0);
-    objs[0].cd = vec3(0.3);
-    objs[0].cs = vec3(1.0, 1.0, 1.0);
-    objs[0].cr = vec3(0.3);
-    objs[0].blend = 0.5;
-    objs[0].xform = mat4(6.0 * cos(radians(time)), 0.0, 6.0 * -sin(radians(time)), 0.0,
-                         0.0, 6.0, 0.0, 0.0,
-                         6.0 * sin(radians(time)), 0.0, 6.0 * cos(radians(time)), 0.0,
-                         0.0, 0.0, 0.0, 1.0);
+    objs[0].ca = vec3(0.0);
+    objs[0].cd = vec3(0.4, 0.4, 0.4);
+    objs[0].cs = vec3(0.0);
+    objs[0].cr = vec3(0.0);
+    objs[0].blend = 0.0;
+    objs[0].xform = mat4(60.0, 0.0, 0.0, 0.0,
+                         0.0, 0.1, 0.0, 0.0,
+                         0.0, 0.0, 60.0, 0.0,
+                         0.0,-0.6, 0.0, 1.0);
     objs[0].type = 1;
-    objs[0].shininess = 50.0;
+    objs[0].shininess = 1.0;
 
-    objs[1].ca = vec3(0.0, 0.0, 0.0);
-    objs[1].cd = vec3(1.0);
-    objs[1].cs = vec3(1.0, 1.0, 1.0);
-    objs[1].cr = vec3(0.5, 0.5, 0.5);
+    objs[1].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    objs[1].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    objs[1].cs = vec3(0.0);
+    objs[1].cr = vec3(0.0);
     objs[1].blend = 0.0;
-    objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0,  3.0, 0.0,
-                         4.5, 3.0 * sin(time / 50.0),  0.0, 1.0);
+    objs[1].xform = mat4(1.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0,
+                         0.0, 0.0, 1.0, 0.0,
+                         -0.65, 0.0, 0.65, 1.0);
     objs[1].type = 1;
-    objs[1].shininess = 50.0;
+    objs[1].shininess = 1.0;
 
-    objs[2].ca = vec3(0.0, 0.0, 0.0);
-    objs[2].cd = vec3(1.0);
-    objs[2].cs = vec3(1.0, 1.0, 1.0);
-    objs[2].cr = vec3(0.5, 0.5, 0.5);
+
+    objs[2].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    objs[2].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    objs[2].cs = vec3(0.0);
+    objs[2].cr = vec3(0.0);
     objs[2].blend = 0.0;
-    objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0,  3.0, 0.0,
-                         -4.5, -3.0 * sin(time / 50.0),  0.0, 1.0);
+    objs[2].xform = mat4(1.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0,
+                         0.0, 0.0, 1.0, 0.0,
+                         -.65, 0.0, -.65, 1.0);
     objs[2].type = 1;
-    objs[2].shininess = 50.0;
+    objs[2].shininess = 1.0;
 
-    objs[3].ca = vec3(0.0, 0.0, 0.0);
-    objs[3].cd = vec3(1.0);
-    objs[3].cs = vec3(1.0, 1.0, 1.0);
-    objs[3].cr = vec3(0.5, 0.5, 0.5);
+    objs[3].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    objs[3].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    objs[3].cs = vec3(0.0);
+    objs[3].cr = vec3(0.0);
     objs[3].blend = 0.0;
-    objs[3].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0,  3.0, 0.0,
-                         3.0 * cos(time / 50.0), 4.5,  0.0, 1.0);
+    objs[3].xform = mat4(1.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0,
+                         0.0, 0.0, 1.0, 0.0,
+                         .65, 0.0, -.65, 1.0);
     objs[3].type = 1;
-    objs[3].shininess = 50.0;
+    objs[3].shininess = 1.0;
 
-    objs[4].ca = vec3(0.0, 0.0, 0.0);
-    objs[4].cd = vec3(1.0);
-    objs[4].cs = vec3(1.0, 1.0, 1.0);
-    objs[4].cr = vec3(0.5, 0.5, 0.5);
+    objs[4].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    objs[4].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    objs[4].cs = vec3(0.0);
+    objs[4].cr = vec3(0.0);
     objs[4].blend = 0.0;
-    objs[4].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0,  3.0, 0.0,
-                         -3.0 * cos(time / 50.0), -4.5,  0.0, 1.0);
+    objs[4].xform = mat4(1.0, 0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0, 0.0,
+                         0.0, 0.0, 1.0, 0.0,
+                         .65, 0.0, .65, 1.0);
     objs[4].type = 1;
-    objs[4].shininess = 50.0;
+    objs[4].shininess = 1.0;
 
-    objs[5].ca = vec3(0.0, 0.0, 0.0);
-    objs[5].cd = vec3(1.0);
-    objs[5].cs = vec3(1.0, 1.0, 1.0);
-    objs[5].cr = vec3(0.5, 0.5, 0.5);
-    objs[5].blend = 0.0;
-    objs[5].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0,  3.0, 0.0,
-                         0.0, 3.0 * sin(time / 50.0),  4.5, 1.0);
-    objs[5].type = 1;
-    objs[5].shininess = 50.0;
+    lights[0].color = vec3(0.8, 0.8, 0.8);
+    lights[0].function = vec3(0.0);
+    lights[0].pos = vec3(-1.15, 0.5, 1.15);
 
-    objs[6].ca = vec3(0.0, 0.0, 0.0);
-    objs[6].cd = vec3(1.0);
-    objs[6].cs = vec3(1.0, 1.0, 1.0);
-    objs[6].cr = vec3(0.5, 0.5, 0.5);
-    objs[6].blend = 0.0;
-    objs[6].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0,  3.0, 0.0,
-                         0.0, -3.0 * cos(time / 50.0),  -4.5, 1.0);
-    objs[6].type = 1;
-    objs[6].shininess = 50.0;
+    lights[1].color = vec3(0.8, 0.8, 0.8);
+    lights[1].function = vec3(0.0);
+    lights[1].pos = vec3(1.15, 0.5, 1.15);
 
+    lights[2].color = vec3(0.8, 0.8, 0.8);
+    lights[2].function = vec3(0.0);
+    lights[2].pos = vec3(-1.15, 0.5, -1.15);
 
-    lights[0].color = vec3(1.0, 1.0, 1.0);
-    lights[0].function = vec3(0.0, 0.0, 0.0);
-    lights[0].pos = vec3(1.0, -1.8, -2.0);
-
-    lights[1].color = vec3(1.0, 1.0, 1.0);
-    lights[1].function = vec3(0.0, 0.0, 0.0);
-    lights[1].pos = vec3(0.25, 1.0, -1.0);
+    lights[3].color = vec3(0.8, 0.8, 0.8);
+    lights[3].function = vec3(0.0);
+    lights[3].pos = vec3(1.15, 0.5, -1.15);
 }
 
 vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
@@ -258,16 +236,16 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
     for (int j = 0; j < NUM_LIGHTS; j++)
     {
-        // vec3 vertToLight = lights[i].pos - pos;
-        // vec3 lightDir = normalize(vertToLight);
-        vec3 lightDir = normalize(-lights[j].pos);
-        // float dist = sqrt(vertToLight.x * vertToLight.x + vertToLight.y * vertToLight.y + vertToLight.z * vertToLight.z);
+        vec3 vertToLight = lights[j].pos - pos;
+        vec3 lightDir = normalize(vertToLight);
+        // vec3 lightDir = normalize(-lights[j].pos);
+        float dist = sqrt(vertToLight.x * vertToLight.x + vertToLight.y * vertToLight.y + vertToLight.z * vertToLight.z);
 
         vec3 reflectionVec = normalize(reflect(lightDir, o.norm));
         vec3 posAug = pos + (o.norm / 1000.0);
 
-        // float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
-        float falloff = 1.0;
+        float falloff = max(1.0, (lights[j].function.x + dist * lights[j].function.y + dist * dist * lights[j].function.z));
+        // float falloff = 1.0;
         res.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.r * o.obj.cs.r * kS) / falloff;
         res.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.g * o.obj.cs.g * kS) / falloff;
         res.b += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.b * o.obj.cs.b * kS) / falloff;
@@ -286,10 +264,6 @@ void main(void)
 {
     if (settings == 2) {
         outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
-        return;
-    }
-    if (settings == 3) {
-        outColor = vec4(253.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0, 1.0);
         return;
     }
 
@@ -314,10 +288,6 @@ void main(void)
         i = intersectObjs(ro, rd);
 
         if (i.t == -1.0) {
-            if (j == 0) {
-                outColor = vec4(texture2D(bg, vec2(x / height, y / height)).rgb, 1.0);
-                return;
-            }
             break;
         }
 
