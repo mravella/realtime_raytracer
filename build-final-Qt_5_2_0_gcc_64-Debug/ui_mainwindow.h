@@ -54,7 +54,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "A CS123 Final", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "GPU Raytracing 4 Dayzzzz", 0));
     } // retranslateUi
 
 };

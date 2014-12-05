@@ -38,7 +38,11 @@ private:
     bool m_renderSettings;
     int  m_setting;
 
+    glm::vec3 m_eye;
+    glm::mat4 m_filmToWorld;
     Camera m_camera;
+    glm::vec4 m_pos, m_look, m_up;
+    float m_heightAngle;
 
 private slots:
     void tick();

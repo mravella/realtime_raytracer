@@ -47,3 +47,6 @@ DEPENDPATH += /course/cs123/lib/glew/glew-1.10.0/include
 
 INCLUDEPATH+=/usr/local/Cellar/glew/1.11.0/include
 DEPENDPATH+=/usr/local/Cellar/glew/1.11.0/include
+
+RESOURCES += \
+    Resources.qrc

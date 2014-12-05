@@ -25,6 +25,12 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     m_renderSettings = true;
     m_setting = 5;
+
+    // Defaults for camera
+    m_pos = glm::vec4(10.f, 4.1f, 16.f, 1.f);
+    m_up = glm::vec4(0.f, 1.f, 0.f, 0.f);
+    m_look = glm::vec4(-9.f, -3.2f, -16.f, 0.f);
+    m_heightAngle = 45;
 }
 
 View::~View()
@@ -48,7 +54,7 @@ void View::initializeGL()
     m_isInitialized = true;
 
     // Load the shader
-    m_shader = ResourceLoader::loadShaders("/gpfs/main/home/mravella/course/cs123_final/src/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/shader.frag");
+    m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
     GLfloat vertexBufferData[] = {
         -1.0f,  1.0f, 0.0f,
@@ -104,24 +110,19 @@ void View::paintGL()
     } else{
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Defaults
-        glm::vec4 pos = glm::vec4(0.f, 0.f, 3.f, 1.f);
-        glm::vec4 up = glm::vec4(0.f, 1.f, 0.f, 0.f);
-        glm::vec4 look = glm::vec4(0.f, 0.f, -1.f, 0.f);
-        float heightAngle = 45;
-
         glUseProgram(m_shader);
-        m_camera.orientLook(pos, look, up);
-        m_camera.setHeightAngle(heightAngle);
+
+        m_camera.orientLook(m_pos, m_look, m_up);
+        m_camera.setHeightAngle(m_heightAngle);
 
         glm::mat4 viewMatrix = m_camera.getViewMatrix();
-        glm::vec3 eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
-        glm::mat4 filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
+        m_eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
+        m_filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
 
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(filmToWorld));
-        glUniform3f(glGetUniformLocation(m_shader, "eye"), eye.x, eye.y, eye.z);
+        glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
+        glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
         glUniform1i(glGetUniformLocation(m_shader, "settings"), m_setting);
 
         glBindVertexArray(m_vaoID);
@@ -199,6 +200,16 @@ void View::keyPressEvent(QKeyEvent *event)
     }
     if (event->key() == Qt::Key_5) {
         m_setting = 5;
+    }
+    if (event->key() == Qt::Key_Up) {
+        m_pos.x += 1.0f;
+        m_pos.y += 1.0f;
+        m_pos.z += 1.0f;
+    }
+    if (event->key() == Qt::Key_Down) {
+        m_pos.x -= 1.0f;
+        m_pos.y -= 1.0f;
+        m_pos.z -= 1.0f;
     }
 }
 
