@@ -111,11 +111,11 @@ void View::initializeGL()
     if (m_textureId == -1)
         cout << "Texture does not exist" << endl;
 
-    m_bg = loadTexture("/gpfs/main/home/mravella/course/cs123_final/src/shaders/gradient.jpg");
+    m_bg = loadTexture(":/shaders/gradient.jpg");
     if (m_bg == -1)
         cout << "Texure does not exist" << endl;
 
-    m_noise = loadTexture("/gpfs/main/home/mravella/course/cs123_final/src/shaders/noise.png");
+    m_noise = loadTexture(":/shaders/noise.png");
     if (m_noise == -1)
         cout << "Texure does not exist" << endl;
 
@@ -192,7 +192,7 @@ void View::paintGL()
 
         glUseProgram(0);
 
-//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/ssao.frag");
+//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/ssao.frag");
 //        glUseProgram(m_shader);
 //        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -285,7 +285,7 @@ void View::keyPressEvent(QKeyEvent *event)
         m_setting = 2;
     }
     if (event->key() == Qt::Key_3) {
-        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/grid.frag");
+        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
         m_setting = 3;
     }
     if (event->key() == Qt::Key_4) {
