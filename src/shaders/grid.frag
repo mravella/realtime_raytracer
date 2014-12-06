@@ -1,9 +1,11 @@
 #version 330
 
+#pragma optionNV (unroll all)
+
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 5
+#define NUM_OBJS 17
 #define NUM_LIGHTS 4
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
@@ -152,66 +154,84 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
 
 void init()
 {
-    objs[0].ca = vec3(0.0);
-    objs[0].cd = vec3(0.4, 0.4, 0.4);
-    objs[0].cs = vec3(0.0);
-    objs[0].cr = vec3(0.0);
-    objs[0].blend = 0.0;
-    objs[0].xform = mat4(60.0, 0.0, 0.0, 0.0,
+
+    for (int j = 0; j < 4; j++)
+    {
+        for (int k = 0; k < 4; k++)
+        {
+            objs[j * 4 + k].ca = vec3(0.0);
+            objs[j * 4 + k].cd = vec3(0.4, 0.4, 0.4);
+            objs[j * 4 + k].cs = vec3(0.0);
+            objs[j * 4 + k].cr = vec3(0.0);
+            objs[j * 4 + k].blend = 0.0;
+            objs[j * 4 + k].xform = mat4(1.0, 0.0, 0.0, 0.0,
+                                 0.0, 1.0, 0.0, 0.0,
+                                 0.0, 0.0, 1.0, 0.0,
+                                 j * 0.65, 0.0, k * 0.65, 1.0);
+            objs[j * 4 + k].type = 1;
+            objs[j * 4 + k].shininess = 1.0;
+        }
+    }
+    objs[16].ca = vec3(0.0);
+    objs[16].cd = vec3(0.4, 0.4, 0.4);
+    objs[16].cs = vec3(0.0);
+    objs[16].cr = vec3(0.0);
+    objs[16].blend = 0.0;
+    objs[16].xform = mat4(60.0, 0.0, 0.0, 0.0,
                          0.0, 0.1, 0.0, 0.0,
                          0.0, 0.0, 60.0, 0.0,
                          0.0,-0.6, 0.0, 1.0);
-    objs[0].type = 1;
-    objs[0].shininess = 1.0;
+    objs[16].type = 1;
+    objs[16].shininess = 1.0;
 
-    objs[1].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
-    objs[1].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
-    objs[1].cs = vec3(0.0);
-    objs[1].cr = vec3(0.0);
-    objs[1].blend = 0.0;
-    objs[1].xform = mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, 1.0, 0.0,
-                         -0.65, 0.0, 0.65, 1.0);
-    objs[1].type = 1;
-    objs[1].shininess = 1.0;
+    // objs[1].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    // objs[1].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    // objs[1].cs = vec3(0.0);
+    // objs[1].cr = vec3(0.0);
+    // objs[1].blend = 0.0;
+    // objs[1].xform = mat4(1.0, 0.0, 0.0, 0.0,
+    //                      0.0, 1.0, 0.0, 0.0,
+    //                      0.0, 0.0, 1.0, 0.0,
+    //                      -0.65, 0.0, 0.65, 1.0);
+    // objs[1].type = 1;
+    // objs[1].shininess = 1.0;
 
 
-    objs[2].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
-    objs[2].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
-    objs[2].cs = vec3(0.0);
-    objs[2].cr = vec3(0.0);
-    objs[2].blend = 0.0;
-    objs[2].xform = mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, 1.0, 0.0,
-                         -.65, 0.0, -.65, 1.0);
-    objs[2].type = 1;
-    objs[2].shininess = 1.0;
+    // objs[2].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    // objs[2].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    // objs[2].cs = vec3(0.0);
+    // objs[2].cr = vec3(0.0);
+    // objs[2].blend = 0.0;
+    // objs[2].xform = mat4(1.0, 0.0, 0.0, 0.0,
+    //                      0.0, 1.0, 0.0, 0.0,
+    //                      0.0, 0.0, 1.0, 0.0,
+    //                      -.65, 0.0, -.65, 1.0);
+    // objs[2].type = 1;
+    // objs[2].shininess = 1.0;
 
-    objs[3].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
-    objs[3].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
-    objs[3].cs = vec3(0.0);
-    objs[3].cr = vec3(0.0);
-    objs[3].blend = 0.0;
-    objs[3].xform = mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, 1.0, 0.0,
-                         .65, 0.0, -.65, 1.0);
-    objs[3].type = 1;
-    objs[3].shininess = 1.0;
+    // objs[3].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    // objs[3].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    // objs[3].cs = vec3(0.0);
+    // objs[3].cr = vec3(0.0);
+    // objs[3].blend = 0.0;
+    // objs[3].xform = mat4(1.0, 0.0, 0.0, 0.0,
+    //                      0.0, 1.0, 0.0, 0.0,
+    //                      0.0, 0.0, 1.0, 0.0,
+    //                      .65, 0.0, -.65, 1.0);
+    // objs[3].type = 1;
+    // objs[3].shininess = 1.0;
 
-    objs[4].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
-    objs[4].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
-    objs[4].cs = vec3(0.0);
-    objs[4].cr = vec3(0.0);
-    objs[4].blend = 0.0;
-    objs[4].xform = mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, 1.0, 0.0,
-                         .65, 0.0, .65, 1.0);
-    objs[4].type = 1;
-    objs[4].shininess = 1.0;
+    // objs[4].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
+    // objs[4].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
+    // objs[4].cs = vec3(0.0);
+    // objs[4].cr = vec3(0.0);
+    // objs[4].blend = 0.0;
+    // objs[4].xform = mat4(1.0, 0.0, 0.0, 0.0,
+    //                      0.0, 1.0, 0.0, 0.0,
+    //                      0.0, 0.0, 1.0, 0.0,
+    //                      .65, 0.0, .65, 1.0);
+    // objs[4].type = 1;
+    // objs[4].shininess = 1.0;
 
     lights[0].color = vec3(0.8, 0.8, 0.8);
     lights[0].function = vec3(0.0);

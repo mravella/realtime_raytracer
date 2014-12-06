@@ -3,13 +3,14 @@
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 7
+#define NUM_OBJS 8
 #define NUM_LIGHTS 2
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
 #define kD 0.5
 #define kS 0.5
 #define MAXDEPTH 2
+#define DELTA 0.001
 
 out vec4 outColor;
 uniform float width;
@@ -80,8 +81,7 @@ float quadratic(float a, float b, float c)
         return -1.0;
     }
     else {
-        return smallestPos
-        ((-b - pow(dscr, 0.5)) / (2.0 * a), (-b + pow(dscr, 0.5)) / (2.0 * a));
+        return smallestPos((-b - pow(dscr, 0.5)) / (2.0 * a), (-b + pow(dscr, 0.5)) / (2.0 * a));
     }
 }
 
@@ -92,6 +92,11 @@ float intersectSphere(vec3 ro, vec3 rd)
     float c = pow(ro.x, 2.0) + pow(ro.y, 2.0) + pow(ro.z, 2.0) - 0.25;
 
     return quadratic(a, b, c);
+}
+
+float getHeight(vec2 uv, float blend)
+{
+    return ((1.0 - blend) * 1.0 + blend * texture2D(textureSampler, uv).r);
 }
 
 isect intersectObjs(vec3 ro, vec3 rd)
@@ -119,8 +124,25 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.t = minT;
     i.obj = minObj;
     i.pos = minPos;
-    i.norm = normalize(minPos);
     i.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
+    i.norm = normalize(minPos);
+    i.norm.x = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).r * 100.0) * i.norm.x;
+    i.norm.y = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).g * 100.0) * i.norm.y;
+    i.norm.z = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).b * 100.0) * i.norm.z;
+    float temp = dot(i.norm, i.norm);
+    if (temp != 0.0)
+    {
+        temp = pow(temp, -0.5);
+        i.norm = temp * i.norm;
+    }
+//    float diffX = getHeight(vec2(i.tex.x + DELTA, i.tex.y), minObj.blend) - getHeight(vec2(i.tex.x - DELTA, i.tex.y), minObj.blend);
+//    float diffY = getHeight(vec2(i.tex.x, i.tex.y + DELTA), minObj.blend) - getHeight(vec2(i.tex.x, i.tex.y - DELTA), minObj.blend);
+//    vec2 localDiff = -vec2(diffX, diffY);
+//    localDiff = (localDiff / 2.0) + 0.5;
+//    float localDiffMag = length(localDiff);
+//    float z = sqrt(1.0 - pow(localDiffMag, 2.0));
+//    i.norm = vec3(localDiff, z);
+
     return i;
 }
 
@@ -139,7 +161,6 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
         vec3 posAug = pos + (norm / 1000.0);
 
         // float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
-        // int shadow = int(smallestPos(10000.0, intersectObjs(posAug, -lights[i].pos).t) !=  10000.0);
         float falloff = 1.0;
         spec.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.r) / falloff;
         spec.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.g) / falloff;
@@ -238,6 +259,18 @@ void init()
     objs[6].type = 1;
     objs[6].shininess = 50.0;
 
+    objs[7].ca = vec3(0.2, 0.3, 0.25);
+    objs[7].cd = vec3(0.1);
+    objs[7].cs = vec3(0.0);
+    objs[7].cr = vec3(0.0);
+    objs[7].blend = 1.0;
+    objs[7].xform = mat4(40.0, 0.0, 0.0, 0.0,
+                         0.0, 40.0, 0.0, 0.0,
+                         0.0, 0.0,  40.0, 0.0,
+                         0.0, 0.0,  0.0, 1.0);
+    objs[7].type = 1;
+    objs[7].shininess = 1.0;
+
 
     lights[0].color = vec3(1.0, 1.0, 1.0);
     lights[0].function = vec3(0.0, 0.0, 0.0);
@@ -251,7 +284,6 @@ void init()
 vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 {
     vec3 res = o.obj.ca;
-
     for (int j = 0; j < NUM_LIGHTS; j++)
     {
         // vec3 vertToLight = lights[i].pos - pos;

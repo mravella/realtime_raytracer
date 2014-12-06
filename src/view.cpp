@@ -111,7 +111,7 @@ void View::initializeGL()
     if (m_textureId == -1)
         cout << "Texture does not exist" << endl;
 
-    m_bg = loadTexture("/course/cs123/data/image/boat.jpg");
+    m_bg = loadTexture("/gpfs/main/home/mravella/course/cs123_final/src/shaders/gradient.jpg");
     if (m_bg == -1)
         cout << "Texure does not exist" << endl;
 
