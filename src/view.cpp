@@ -1,10 +1,18 @@
-#include "view.h"
+ #include "view.h"
 #include <QApplication>
 #include <QKeyEvent>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 using namespace std;
+
+/*
+ * To Fix:
+ * Put shaders in hashtable
+ * Make keylisteners make sense
+ * Add mouse interaction
+ * Add proper logic for render passes
+ */
 
 View::View(QWidget *parent) : QGLWidget(parent)
 {
@@ -41,6 +49,12 @@ View::~View()
 
 void View::initializeGL()
 {
+    QGLFormat glFormat;
+    glFormat.setVersion(3, 3);
+    glFormat.setProfile(QGLFormat::CoreProfile);
+
+    QGLFormat::setDefaultFormat(glFormat);
+
     // All OpenGL initialization *MUST* be done during or after this
     // method. Before this method is called, there is no active OpenGL
     // context and all OpenGL calls have no effect.
@@ -101,6 +115,10 @@ void View::initializeGL()
     if (m_bg == -1)
         cout << "Texure does not exist" << endl;
 
+    m_noise = loadTexture("/gpfs/main/home/mravella/course/cs123_final/src/shaders/noise.png");
+    if (m_noise == -1)
+        cout << "Texure does not exist" << endl;
+
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -113,6 +131,21 @@ void View::initializeGL()
     // events. This occurs if there are two monitors and the mouse is on the
     // secondary monitor.
     QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
+
+    // Create framebuffer object
+    glGenFramebuffers( 1, &m_renderFBO );
+    glBindFramebuffer( GL_FRAMEBUFFER, m_renderFBO );
+
+    glActiveTexture( GL_TEXTURE0 );
+    glGenTextures( 1, &m_beautyPass);
+    glBindTexture( GL_TEXTURE_2D, m_beautyPass );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width(), height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_beautyPass, 0);
+
+    glBindFramebuffer( GL_FRAMEBUFFER, 0);
+
 }
 
 void View::paintGL()
@@ -120,16 +153,12 @@ void View::paintGL()
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
         glUseProgram(m_shader);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-//        m_pos = glm::vec4(-6.0f, 4.0f, 4.0f, 1.f);
-//        m_up = glm::vec4(0.f, 1.f, 0.f, 0.f);
-//        m_look = glm::vec4(6.f, -4.f, -4.f, 0.f);
-//        m_heightAngle = 30;
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         m_camera.orientLook(m_pos, m_look, m_up);
         m_camera.setHeightAngle(m_heightAngle);
@@ -142,6 +171,7 @@ void View::paintGL()
         glBindTexture(GL_TEXTURE_2D, m_textureId);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, m_bg);
+
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
@@ -151,13 +181,47 @@ void View::paintGL()
         glUniform1i(glGetUniformLocation(m_shader, "textureSampler"), 0);
         glUniform1i(glGetUniformLocation(m_shader, "bg"), 1);
 
-
         glBindVertexArray(m_vaoID);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
         glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         glUseProgram(0);
+
+//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", "/gpfs/main/home/mravella/course/cs123_final/src/shaders/ssao.frag");
+//        glUseProgram(m_shader);
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, m_beautyPass);
+//        glActiveTexture(GL_TEXTURE1);
+//        glBindTexture(GL_TEXTURE_2D, m_noise);
+
+//        glUniform1i(glGetUniformLocation(m_shader, "render"), 0);
+//        glUniform1f(glGetUniformLocation(m_shader, "height"), (float) height());
+//        glUniform1f(glGetUniformLocation(m_shader, "width"), (float) width());
+//        glUniform1i(glGetUniformLocation(m_shader, "noise"), 1);
+//        glUniform1f(glGetUniformLocation(m_shader, "noiseWidth"), 512.f);
+//        glUniform1f(glGetUniformLocation(m_shader, "noiseHeight"), 512.f);
+
+//        glBindVertexArray(m_vaoID);
+//        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+//        glBindVertexArray(0);
+
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, 0);
+//        glActiveTexture(GL_TEXTURE1);
+//        glBindTexture(GL_TEXTURE_2D, m_noise);
+
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//        glUseProgram(0);
 
 
         if (m_renderSettings) {
@@ -172,7 +236,7 @@ void View::paintGL()
             this->renderText(10, height() - 66, "(1) Toggle Settings");
             this->renderText(10, height() - 52, "(2) Purple");
             this->renderText(10, height() - 38, "(3) Light Spheres");
-            this->renderText(10, height() - 24, "(4) No Reflections");
+            this->renderText(10, height() - 24, "(4) Depth Pass");
             this->renderText(10, height() - 10, "(5) Recursive Spheres Animation");
         }
     }

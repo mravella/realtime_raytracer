@@ -262,6 +262,7 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
 void main(void)
 {
+
     if (settings == 2) {
         outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
         return;
@@ -280,10 +281,32 @@ void main(void)
     vec3 res = vec3(0.0);
     vec3 spec = vec3(1.0);
     int depth = MAXDEPTH;
+
+    i = intersectObjs(ro, rd);
+    float firstT = i.t;
     if (settings == 4) {
-        depth = 1;
+
+        if (i.t == -1.0) {
+            outColor = vec4(1.0);
+            return;
+        }
+        outColor = vec4(i.t / 100.0, i.t / 100.0, i.t / 100.0, 1.0);
+        return;
     }
-    for (int j = 0; j < depth; j++)
+    if (i.t == -1.0) {
+        return;
+    }
+
+    vec3 worldPos = rd * i.t + ro;
+    // Fix Spec & maybe do less matrix operations for the speed
+    i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
+    res += spec * calculateLighting(worldPos, rd, i);
+    spec *= i.obj.cr;
+
+    rd = reflect(rd, i.norm);
+    ro = worldPos + (rd / 1000.0);
+
+    for (int j = 0; j < depth - 1; j++)
     {
         i = intersectObjs(ro, rd);
 

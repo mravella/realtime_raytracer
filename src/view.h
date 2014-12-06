@@ -49,6 +49,10 @@ private:
     int m_count;
     int m_textureId;
     int m_bg;
+    int m_noise;
+
+    GLuint m_renderFBO;
+    GLuint m_beautyPass;
 
 private slots:
     void tick();

@@ -80,7 +80,8 @@ float quadratic(float a, float b, float c)
         return -1.0;
     }
     else {
-        return smallestPos((-b - pow(dscr, 0.5)) / (2.0 * a), (-b + pow(dscr, 0.5)) / (2.0 * a));
+        return smallestPos
+        ((-b - pow(dscr, 0.5)) / (2.0 * a), (-b + pow(dscr, 0.5)) / (2.0 * a));
     }
 }
 
@@ -123,11 +124,6 @@ isect intersectObjs(vec3 ro, vec3 rd)
     return i;
 }
 
-float isShadow(vec3 pos, light l)
-{
-    return int(!(smallestPos(10000.0, intersectObjs(pos, -l.pos).t) ==  10000.0));
-}
-
 lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
 {
     vec3 diffuse = vec3(0.0, 0.0, 0.0);
@@ -143,14 +139,14 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
         vec3 posAug = pos + (norm / 1000.0);
 
         // float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
-        int shadow = int(smallestPos(10000.0, intersectObjs(posAug, -lights[i].pos).t) !=  10000.0);
+        // int shadow = int(smallestPos(10000.0, intersectObjs(posAug, -lights[i].pos).t) !=  10000.0);
         float falloff = 1.0;
-        spec.r += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.r) / falloff;
-        spec.g += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.g) / falloff;
-        spec.b += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.b) / falloff;
-        diffuse.r += shadow * max(0.0, dot(norm, lightDir) * lights[i].color.r) / falloff;
-        diffuse.g += shadow * max(0.0, dot(norm, lightDir) * lights[i].color.g) / falloff;
-        diffuse.b += shadow * max(0.0, dot(norm, lightDir) * lights[i].color.b) / falloff;
+        spec.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.r) / falloff;
+        spec.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.g) / falloff;
+        spec.b += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), shininess) * lights[i].color.b) / falloff;
+        diffuse.r += max(0.0, dot(norm, lightDir) * lights[i].color.r) / falloff;
+        diffuse.g += max(0.0, dot(norm, lightDir) * lights[i].color.g) / falloff;
+        diffuse.b += max(0.0, dot(norm, lightDir) * lights[i].color.b) / falloff;
 
     }
     return lighting(diffuse, spec);
@@ -226,7 +222,7 @@ void init()
     objs[5].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, 3.0 * sin(time / 50.0),  4.5, 1.0);
+                         0.0, 3.0 * cos(time / 50.0),  4.5, 1.0);
     objs[5].type = 1;
     objs[5].shininess = 50.0;
 
@@ -288,10 +284,6 @@ void main(void)
         outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
         return;
     }
-    if (settings == 3) {
-        outColor = vec4(253.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0, 1.0);
-        return;
-    }
 
     float x = gl_FragCoord.x;
     float y = height - gl_FragCoord.y;
@@ -306,18 +298,43 @@ void main(void)
     vec3 res = vec3(0.0);
     vec3 spec = vec3(1.0);
     int depth = MAXDEPTH;
-    if (settings == 4) {
-        depth = 1;
+
+    i = intersectObjs(ro, rd);
+    float firstT = i.t;
+    if (firstT == -1.0) {
+        firstT = 100.0;
     }
-    for (int j = 0; j < depth; j++)
+    if (settings == 4) {
+
+        if (i.t == -1.0) {
+            outColor = vec4(1.0);
+            return;
+        }
+        outColor = vec4(i.t / 100.0, i.t / 100.0, i.t / 100.0, 1.0);
+        return;
+    }
+
+    if (i.t == -1.0) {
+        outColor = vec4(texture2D(bg, vec2(x / height, y / height)).rgb, 1.0);
+        return;
+        
+    }
+
+    vec3 worldPos = rd * i.t + ro;
+    // Fix Spec & maybe do less matrix operations for the speed
+    i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
+    res += spec * calculateLighting(worldPos, rd, i);
+    spec *= i.obj.cr;
+
+    rd = reflect(rd, i.norm);
+    ro = worldPos + (rd / 1000.0);
+
+
+    for (int j = 0; j < depth - 1; j++)
     {
         i = intersectObjs(ro, rd);
 
         if (i.t == -1.0) {
-            if (j == 0) {
-                outColor = vec4(texture2D(bg, vec2(x / height, y / height)).rgb, 1.0);
-                return;
-            }
             break;
         }
 
@@ -331,7 +348,7 @@ void main(void)
         ro = worldPos + (rd / 1000.0);
     }
 
-    outColor = vec4(res, 1.0);
+    outColor = vec4(res, firstT / 100.0);
     // outColor = vec4(texture2D(textureSampler, vec2(x, y) / height).rgb, 1.0);
 }
 
