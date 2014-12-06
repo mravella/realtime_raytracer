@@ -2,5 +2,9 @@
     <qresource prefix="/shaders">
         <file alias="shader.frag">shaders/shader.frag</file>
         <file alias="shader.vert">shaders/shader.vert</file>
+        <file alias="grid.frag">shaders/grid.frag</file>
+        <file alias="gradient.jpg">shaders/gradient.jpg</file>
+        <file alias="ssao.frag">shaders/ssao.frag</file>
+        <file alias="noise.png">shaders/noise.png</file>
     </qresource>
 </RCC>

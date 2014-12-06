@@ -453,8 +453,12 @@ compiler_rcc_make_all: qrc_Resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp
 qrc_Resources.cpp: ../src/Resources.qrc \
+		../src/shaders/gradient.jpg \
 		../src/shaders/shader.frag \
-		../src/shaders/shader.vert
+		../src/shaders/ssao.frag \
+		../src/shaders/shader.vert \
+		../src/shaders/grid.frag \
+		../src/shaders/noise.png
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
@@ -700,6 +704,7 @@ moc_view.cpp: ../../../../../course/cs123/lib/glew/glew-1.10.0/include/GL/glew.h
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QTimer \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtimer.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qbasictimer.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QString \
 		../src/lib/ResourceLoader.h \
 		../src/camera.h \
 		../src/glm/glm.hpp \
@@ -914,6 +919,7 @@ ui_mainwindow.h: ../src/mainwindow.ui \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QTimer \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtimer.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qbasictimer.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QString \
 		../src/lib/ResourceLoader.h \
 		../src/camera.h \
 		../src/glm/glm.hpp \
@@ -1294,6 +1300,7 @@ mainwindow.o: ../src/mainwindow.cpp ../src/mainwindow.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QTimer \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtimer.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qbasictimer.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QString \
 		../src/lib/ResourceLoader.h \
 		../src/camera.h \
 		../src/glm/glm.hpp \
@@ -1501,6 +1508,7 @@ view.o: ../src/view.cpp ../src/view.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QTimer \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtimer.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qbasictimer.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QString \
 		../src/lib/ResourceLoader.h \
 		../src/camera.h \
 		../src/glm/glm.hpp \
