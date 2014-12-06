@@ -54,7 +54,9 @@ private:
     GLuint m_renderFBO;
     GLuint m_beautyPass;
 
-    bool m_mouseDown;
+    bool m_middleMouseDown;
+    bool m_rightMouseDown;
+    bool m_leftMouseDown;
     glm::vec2 m_lastMouse;
 
 private slots:

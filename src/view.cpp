@@ -42,6 +42,9 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_heightAngle = 45;
     m_count = 0;
 
+    m_middleMouseDown = false;
+    m_rightMouseDown = false;
+
 }
 
 View::~View()
@@ -251,8 +254,18 @@ void View::resizeGL(int w, int h)
 
 void View::mousePressEvent(QMouseEvent *event)
 {
-    m_mouseDown = true;
-    m_lastMouse = glm::vec2(event->x(), event->y());
+    if (event->button() == Qt::MiddleButton) {
+        m_middleMouseDown = true;
+        m_lastMouse = glm::vec2(event->x(), event->y());
+    }
+    if (event->button() == Qt::RightButton) {
+        m_rightMouseDown = true;
+        m_lastMouse = glm::vec2(event->x(), event->y());
+    }
+    if (event->button() == Qt::LeftButton) {
+        m_leftMouseDown = true;
+        m_lastMouse = glm::vec2(event->x(), event->y());
+    }
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -270,15 +283,28 @@ void View::mouseMoveEvent(QMouseEvent *event)
 //    QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     // TODO: Handle mouse movements here
-    if(m_mouseDown) {
+    if (m_middleMouseDown) {
         glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
-        m_pos += glm::vec4(mouseChange.x, -mouseChange.y,0,0) / 200.f;
+        m_pos += glm::vec4(mouseChange.x, -mouseChange.y,0,0) / 500.f;
+    }
+    if (m_rightMouseDown) {
+        glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
+        glm::vec4 translate = m_look * .001f * mouseChange.x;
+        m_pos += translate;
+    }
+    if (m_leftMouseDown) {
+
     }
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
-    m_mouseDown = false;
+    if (event->button() == Qt::MiddleButton)
+        m_middleMouseDown = false;
+    if (event->button() == Qt::RightButton)
+        m_rightMouseDown = false;
+    if (event->button() == Qt::LeftButton)
+        m_leftMouseDown == false;
 }
 
 void View::keyPressEvent(QKeyEvent *event)
