@@ -54,6 +54,9 @@ private:
     GLuint m_renderFBO;
     GLuint m_beautyPass;
 
+    bool m_mouseDown;
+    glm::vec2 m_lastMouse;
+
 private slots:
     void tick();
 };

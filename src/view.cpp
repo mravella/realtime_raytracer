@@ -4,6 +4,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <QDebug>
 using namespace std;
 
 /*
@@ -250,6 +251,8 @@ void View::resizeGL(int w, int h)
 
 void View::mousePressEvent(QMouseEvent *event)
 {
+    m_mouseDown = true;
+    m_lastMouse = glm::vec2(event->x(), event->y());
 }
 
 void View::mouseMoveEvent(QMouseEvent *event)
@@ -267,10 +270,15 @@ void View::mouseMoveEvent(QMouseEvent *event)
 //    QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     // TODO: Handle mouse movements here
+    if(m_mouseDown) {
+        glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
+        m_pos += glm::vec4(mouseChange.x, -mouseChange.y,0,0) / 200.f;
+    }
 }
 
 void View::mouseReleaseEvent(QMouseEvent *event)
 {
+    m_mouseDown = false;
 }
 
 void View::keyPressEvent(QKeyEvent *event)
