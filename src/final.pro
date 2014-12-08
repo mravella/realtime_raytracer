@@ -29,7 +29,11 @@ HEADERS += mainwindow.h \
 
 OTHER_FILES += \
     shaders/shader.frag \
-    shaders/shader.vert
+    shaders/shader.vert \
+    shaders/ssao.frag \
+    shaders/grid.frag \
+    shaders/blur.frag \
+    shaders/dof.frag
 
 FORMS += mainwindow.ui
 

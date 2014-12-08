@@ -1,4 +1,4 @@
-#version 330 core
+#version 400 core
 
 out vec4 outColor;
 uniform sampler2D render;

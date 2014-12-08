@@ -8,6 +8,7 @@
 #include <QString>
 #include "ResourceLoader.h"
 #include "camera.h"
+#include <string.h>
 
 class View : public QGLWidget
 {
@@ -33,6 +34,7 @@ private:
     void keyReleaseEvent(QKeyEvent *event);
 
     int loadTexture(const QString &filename);
+    void createBlurKernel(int, int, int, GLfloat*, GLfloat*);
 
     GLuint m_shader;
     GLuint m_vaoID;
@@ -50,6 +52,11 @@ private:
     int m_textureId;
     int m_bg;
     int m_noise;
+    GLint m_arraySize;
+    GLfloat *m_kernel;
+    GLfloat *m_offsets;
+
+    float m_focalDepth;
 
     GLuint m_renderFBO;
     GLuint m_beautyPass;
@@ -58,6 +65,8 @@ private:
     bool m_rightMouseDown;
     bool m_leftMouseDown;
     glm::vec2 m_lastMouse;
+
+    std::map<std::string, GLuint> m_shaders;
 
 private slots:
     void tick();

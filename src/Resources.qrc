@@ -6,5 +6,7 @@
         <file alias="gradient.jpg">shaders/gradient.jpg</file>
         <file alias="ssao.frag">shaders/ssao.frag</file>
         <file alias="noise.png">shaders/noise.png</file>
+        <file alias="blur.frag">shaders/blur.frag</file>
+        <file alias="dof.frag">shaders/dof.frag</file>
     </qresource>
 </RCC>

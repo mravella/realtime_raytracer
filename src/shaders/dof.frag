@@ -3,14 +3,14 @@
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 8
+#define NUM_OBJS 7
 #define NUM_LIGHTS 2
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
 #define kD 0.5
 #define kS 0.5
 #define MAXDEPTH 2
-#define DELTA -1.0 / 512.0
+#define DELTA 0.001
 
 out vec4 outColor;
 uniform float width;
@@ -22,9 +22,6 @@ uniform int settings;
 uniform float time;
 uniform sampler2D textureSampler;
 uniform sampler2D bg;
-
-// Make this a uniform with a control
-float bumpDepth = 10.0;
 
 struct obj
 {
@@ -125,24 +122,22 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.pos = minPos;
     i.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
     i.norm = normalize(minPos);
-//     i.norm.x = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).r * 100.0) * i.norm.x;
-//     i.norm.y = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).g * 100.0) * i.norm.y;
-//     i.norm.z = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).b * 100.0) * i.norm.z;
-//     float temp = dot(i.norm, i.norm);
-//     if (temp != 0.0)
-//     {
-//         temp = pow(temp, -0.5);
-//         i.norm = temp * i.norm;
-//     }
-	vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
-	vec3 v = normalize(cross(u, i.norm));
-	mat3 m = mat3(u, v, i.norm);
-	float A = texture2D(textureSampler, i.tex).r * bumpDepth;
-	float B = texture2D(textureSampler, i.tex + vec2(DELTA, 0.0)).r * bumpDepth;
-	float C = texture2D(textureSampler, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
-	vec3 norm = normalize(vec3(B - A, C - A, 0.25));
-	i.norm = normalize(m * norm);
-
+    i.norm.x = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).r * 100.0) * i.norm.x;
+    i.norm.y = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).g * 100.0) * i.norm.y;
+    i.norm.z = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).b * 100.0) * i.norm.z;
+    float temp = dot(i.norm, i.norm);
+    if (temp != 0.0)
+    {
+        temp = pow(temp, -0.5);
+        i.norm = temp * i.norm;
+    }
+//    float diffX = getHeight(vec2(i.tex.x + DELTA, i.tex.y), minObj.blend) - getHeight(vec2(i.tex.x - DELTA, i.tex.y), minObj.blend);
+//    float diffY = getHeight(vec2(i.tex.x, i.tex.y + DELTA), minObj.blend) - getHeight(vec2(i.tex.x, i.tex.y - DELTA), minObj.blend);
+//    vec2 localDiff = -vec2(diffX, diffY);
+//    localDiff = (localDiff / 2.0) + 0.5;
+//    float localDiffMag = length(localDiff);
+//    float z = sqrt(1.0 - pow(localDiffMag, 2.0));
+//    i.norm = vec3(localDiff, z);
 
     return i;
 }
@@ -171,7 +166,7 @@ void init()
     objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         4.5, 3.0 * sin(time / 50.0),  0.0, 1.0);
+                         0.0, 0.0,  20.0, 1.0);
     objs[1].pos = vec3(4.5, 3.0 * sin(time / 50.0), 0.0);
     objs[1].radius = 3.0;
     objs[1].type = 1;
@@ -185,7 +180,7 @@ void init()
     objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         -4.5, -3.0 * sin(time / 50.0),  0.0, 1.0);
+                         1.0,0.0,  16.0, 1.0);
     objs[2].pos = vec3(-4.5, -3.0 * sin(time / 50.0),  0.0);
     objs[2].radius = 3.0;
     objs[2].type = 2;
@@ -199,7 +194,7 @@ void init()
     objs[3].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         3.0 * cos(time / 50.0), 4.5,  0.0, 1.0);
+                         2.0, 0.0,  12.0, 1.0);
     objs[3].pos = vec3(3.0 * cos(time / 50.0), 4.5,  0.0);
     objs[3].radius = 3.0;
     objs[3].type = 3;
@@ -213,7 +208,7 @@ void init()
     objs[4].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         -3.0 * cos(time / 50.0), -4.5,  0.0, 1.0);
+                        3.0, 0.0,  8.0, 1.0);
     objs[4].pos = vec3(-3.0 * cos(time / 50.0), -4.5, 0.0);
     objs[4].radius = 3.0;
     objs[4].type = 4;
@@ -227,7 +222,7 @@ void init()
     objs[5].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, 3.0 * cos(time / 50.0),  4.5, 1.0);
+                         4.0, 0.0 ,  4.5, 1.0);
     objs[5].pos = vec3(0.0, 3.0 * cos(time / 50.0), 4.5);
     objs[5].radius = 3.0;
     objs[5].type = 5;
@@ -241,25 +236,12 @@ void init()
     objs[6].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
-                         0.0, -3.0 * cos(time / 50.0),  -4.5, 1.0);
+                         5.0, 0.0,  -4.5, 1.0);
     objs[6].pos = vec3(0.0, -3.0 * cos(time / 50.0), -4.5);
     objs[6].radius = 3.0;
     objs[6].type = 6;
     objs[6].shininess = 50.0;
 
-    objs[7].ca = vec3(0.2, 0.3, 0.25);
-    objs[7].cd = vec3(0.1);
-    objs[7].cs = vec3(0.0);
-    objs[7].cr = vec3(0.0);
-    objs[7].blend = 1.0;
-    objs[7].xform = mat4(100.0, 0.0, 0.0, 0.0,
-                         0.0, 100.0, 0.0, 0.0,
-                         0.0, 0.0,  100.0, 0.0,
-                         0.0, 0.0,  0.0, 1.0);
-    objs[7].pos = vec3(100.0, 100.0, 100.0);
-    objs[7].radius = 0.0;
-    objs[7].type = 7;
-    objs[7].shininess = 1.0;
 
 
     lights[0].color = vec3(1.0, 1.0, 1.0);
@@ -302,11 +284,6 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
 void main(void)
 {
-    if (settings == 2) {
-        outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
-        return;
-    }
-
     float x = gl_FragCoord.x;
     float y = height - gl_FragCoord.y;
 
@@ -338,9 +315,8 @@ void main(void)
     }
 
     if (i.t == -1.0) {
-        outColor = vec4(texture2D(bg, vec2(x / height, y / height)).rgb, 1.0);
         return;
-        
+
     }
 
     vec3 worldPos = rd * i.t + ro;

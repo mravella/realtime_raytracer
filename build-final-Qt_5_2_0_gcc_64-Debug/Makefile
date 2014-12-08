@@ -453,12 +453,14 @@ compiler_rcc_make_all: qrc_Resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp
 qrc_Resources.cpp: ../src/Resources.qrc \
-		../src/shaders/gradient.jpg \
+		../src/shaders/noise.png \
+		../src/shaders/dof.frag \
+		../src/shaders/shader.vert \
+		../src/shaders/blur.frag \
 		../src/shaders/shader.frag \
 		../src/shaders/ssao.frag \
-		../src/shaders/shader.vert \
-		../src/shaders/grid.frag \
-		../src/shaders/noise.png
+		../src/shaders/gradient.jpg \
+		../src/shaders/grid.frag
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
@@ -1607,7 +1609,8 @@ view.o: ../src/view.cpp ../src/view.h \
 		../src/glm/gtx/norm.inl \
 		../src/glm/gtx/string_cast.inl \
 		../src/glm/gtc/type_ptr.hpp \
-		../src/glm/gtc/type_ptr.inl
+		../src/glm/gtc/type_ptr.inl \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QDebug
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o view.o ../src/view.cpp
 
 ResourceLoader.o: ../src/lib/ResourceLoader.cpp ../src/lib/ResourceLoader.h \

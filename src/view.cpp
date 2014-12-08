@@ -7,6 +7,8 @@
 #include <QDebug>
 using namespace std;
 
+#define PI 3.1415927
+
 /*
  * To Fix:
  * Put shaders in hashtable
@@ -41,9 +43,13 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_look = glm::vec4(-9.f, -3.2f, -16.f, 0.f);
     m_heightAngle = 45;
     m_count = 0;
+    m_focalDepth = 0.15f;
 
     m_middleMouseDown = false;
     m_rightMouseDown = false;
+    m_leftMouseDown = false;
+
+
 
 }
 
@@ -111,7 +117,7 @@ void View::initializeGL()
     glBindVertexArray(0);
 
 
-    m_textureId = loadTexture("/course/cs123/data/image/biker.jpg");
+    m_textureId = loadTexture("/course/cs123/data/image/liqmtl.png");
     if (m_textureId == -1)
         cout << "Texture does not exist" << endl;
 
@@ -157,10 +163,20 @@ void View::paintGL()
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
-//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+
+        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+        if (m_setting == 2)
+            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/dof.frag");
+        if (m_setting == 3)
+            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
+        if (m_setting == 5)
+            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
         glUseProgram(m_shader);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        if (m_setting == 2)
+            glBindFramebuffer(GL_FRAMEBUFFER, m_renderFBO);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -196,36 +212,36 @@ void View::paintGL()
 
         glUseProgram(0);
 
-//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/ssao.frag");
-//        glUseProgram(m_shader);
-//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        if (m_setting == 2) {
+            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
+            glUseProgram(m_shader);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-//        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, m_beautyPass);
-//        glActiveTexture(GL_TEXTURE1);
-//        glBindTexture(GL_TEXTURE_2D, m_noise);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, m_beautyPass);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, m_noise);
 
-//        glUniform1i(glGetUniformLocation(m_shader, "render"), 0);
-//        glUniform1f(glGetUniformLocation(m_shader, "height"), (float) height());
-//        glUniform1f(glGetUniformLocation(m_shader, "width"), (float) width());
-//        glUniform1i(glGetUniformLocation(m_shader, "noise"), 1);
-//        glUniform1f(glGetUniformLocation(m_shader, "noiseWidth"), 512.f);
-//        glUniform1f(glGetUniformLocation(m_shader, "noiseHeight"), 512.f);
+            glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
+            glUniform1f(glGetUniformLocation(m_shader, "width"), width());
+            glUniform1f(glGetUniformLocation(m_shader, "height"), height());
+            glUniform1f(glGetUniformLocation(m_shader, "focalDepth"), m_focalDepth);
 
-//        glBindVertexArray(m_vaoID);
-//        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//        glBindVertexArray(0);
+            glBindVertexArray(m_vaoID);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            glBindVertexArray(0);
 
-//        glActiveTexture(GL_TEXTURE0);
-//        glBindTexture(GL_TEXTURE_2D, 0);
-//        glActiveTexture(GL_TEXTURE1);
-//        glBindTexture(GL_TEXTURE_2D, m_noise);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, m_noise);
 
-//        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//        glUseProgram(0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glUseProgram(0);
+        }
 
 
         if (m_renderSettings) {
@@ -238,7 +254,7 @@ void View::paintGL()
             else
                 this->renderText(10, 18, "fps 60.0");
             this->renderText(10, height() - 66, "(1) Toggle Settings");
-            this->renderText(10, height() - 52, "(2) Purple");
+            this->renderText(10, height() - 52, "(2) Depth of Field");
             this->renderText(10, height() - 38, "(3) Light Spheres");
             this->renderText(10, height() - 24, "(4) Depth Pass");
             this->renderText(10, height() - 10, "(5) Recursive Spheres Animation");
@@ -287,13 +303,14 @@ void View::mouseMoveEvent(QMouseEvent *event)
         glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
         m_pos += glm::vec4(mouseChange.x, -mouseChange.y,0,0) / 500.f;
     }
+    if (m_leftMouseDown) {
+        glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
+        m_focalDepth += mouseChange.x / 100.0;
+    }
     if (m_rightMouseDown) {
         glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
         glm::vec4 translate = m_look * .001f * mouseChange.x;
         m_pos += translate;
-    }
-    if (m_leftMouseDown) {
-
     }
 }
 
@@ -330,14 +347,10 @@ void View::keyPressEvent(QKeyEvent *event)
         m_setting = 5;
     }
     if (event->key() == Qt::Key_Up) {
-        m_pos.x += 1.0f;
-        m_pos.y += 1.0f;
-        m_pos.z += 1.0f;
+        if (m_focalDepth < .9) m_focalDepth += 0.05;
     }
     if (event->key() == Qt::Key_Down) {
-        m_pos.x -= 1.0f;
-        m_pos.y -= 1.0f;
-        m_pos.z -= 1.0f;
+        if (m_focalDepth > 0.1) m_focalDepth -= 0.05;
     }
 }
 
