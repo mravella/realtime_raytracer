@@ -3,7 +3,7 @@
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 8
+#define NUM_OBJS 7
 #define NUM_LIGHTS 2
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
@@ -125,23 +125,16 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.pos = minPos;
     i.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
     i.norm = normalize(minPos);
-//     i.norm.x = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).r * 100.0) * i.norm.x;
-//     i.norm.y = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).g * 100.0) * i.norm.y;
-//     i.norm.z = ((1.0 - minObj.blend) * 1.0 + minObj.blend * texture2D(textureSampler, i.tex).b * 100.0) * i.norm.z;
-//     float temp = dot(i.norm, i.norm);
-//     if (temp != 0.0)
-//     {
-//         temp = pow(temp, -0.5);
-//         i.norm = temp * i.norm;
-//     }
-	vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
-	vec3 v = normalize(cross(u, i.norm));
-	mat3 m = mat3(u, v, i.norm);
-	float A = texture2D(textureSampler, i.tex).r * bumpDepth;
-	float B = texture2D(textureSampler, i.tex + vec2(DELTA, 0.0)).r * bumpDepth;
-	float C = texture2D(textureSampler, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
-	vec3 norm = normalize(vec3(B - A, C - A, 0.25));
-	i.norm = normalize(m * norm);
+    
+    // BUMP MAPPING
+// 	vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
+// 	vec3 v = normalize(cross(u, i.norm));
+// 	mat3 m = mat3(u, v, i.norm);
+// 	float A = texture2D(textureSampler, i.tex).r * bumpDepth;
+// 	float B = texture2D(textureSampler, i.tex + vec2(DELTA, 0.0)).r * bumpDepth;
+// 	float C = texture2D(textureSampler, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
+// 	vec3 norm = normalize(vec3(B - A, C - A, 0.25));
+// 	i.norm = normalize(m * norm);
 
 
     return i;
@@ -247,21 +240,6 @@ void init()
     objs[6].type = 6;
     objs[6].shininess = 50.0;
 
-    objs[7].ca = vec3(0.2, 0.3, 0.25);
-    objs[7].cd = vec3(0.1);
-    objs[7].cs = vec3(0.0);
-    objs[7].cr = vec3(0.0);
-    objs[7].blend = 1.0;
-    objs[7].xform = mat4(100.0, 0.0, 0.0, 0.0,
-                         0.0, 100.0, 0.0, 0.0,
-                         0.0, 0.0,  100.0, 0.0,
-                         0.0, 0.0,  0.0, 1.0);
-    objs[7].pos = vec3(100.0, 100.0, 100.0);
-    objs[7].radius = 0.0;
-    objs[7].type = 7;
-    objs[7].shininess = 1.0;
-
-
     lights[0].color = vec3(1.0, 1.0, 1.0);
     lights[0].function = vec3(0.0, 0.0, 0.0);
     lights[0].pos = vec3(1.0, -1.8, -2.0);
@@ -327,6 +305,8 @@ void main(void)
         firstT = 100.0;
     }
 
+    // DEPTH BUFFER
+    
     if (settings == 4) {
 
         if (i.t == -1.0) {
@@ -338,30 +318,30 @@ void main(void)
     }
 
     if (i.t == -1.0) {
-        outColor = vec4(texture2D(bg, vec2(x / height, y / height)).rgb, 1.0);
         return;
         
     }
 
     vec3 worldPos = rd * i.t + ro;
 
+    // AMBIENT OCCLUSION
 
-//    float ao = 0.0;
-//    for (int j = 0; j < NUM_OBJS; j++)
-//    {
-//        if (j == i.obj.type) {
-//            continue;
-//        }
-//        vec3 dir = i.obj.pos - worldPos;
-//        float l = length(dir);
-//        float nl = dot(i.norm, dir / l);
-//        float h = l / i.obj.radius;
-//        float h2 = h * h;
-//        ao += 1.0 - max(0.0, nl) / h2;
-//    }
+   float ao = 0.0;
+   for (int j = 0; j < NUM_OBJS; j++)
+   {
+       if (j == i.obj.type) {
+           continue;
+       }
+       vec3 dir = objs[j].pos - i.pos;
+       float len = max(0.01, length(dir));
+       float normLen = dot(i.norm, dir / len);
+       float h = len / objs[j].radius;
+       float h2 = max(0.01, h * h);
+       ao += max(0.0, normLen) / h2;
+   }
 
-//    outColor = vec4(ao, ao, ao, 1.0);
-//    return;
+   outColor = vec4(1.0 - ao);
+   return;
 
     // Fix Spec & maybe do less matrix operations for the speed
     i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
@@ -391,6 +371,7 @@ void main(void)
     }
 
     outColor = vec4(clamp(res, vec3(0.0), vec3(1.0)), clamp(1.0 / sqrt(firstT), 0.0, 1.0));
+
     // outColor = vec4( clamp(1.0 / sqrt(firstT), 0.0, 1.0));
     // outColor = vec4(texture2D(textureSampler, vec2(x, y) / height).rgb, 1.0);
 }
