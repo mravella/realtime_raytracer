@@ -5,7 +5,7 @@
 
 #define M_PI 3.14159265359
 #define M_INF 1e16
-#define NUM_OBJS 17
+#define NUM_OBJS 26
 #define NUM_LIGHTS 4
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
@@ -155,34 +155,34 @@ lighting computeLighting(vec3 pos, vec3 norm, vec3 rd, float shininess)
 void init()
 {
 
-    for (int j = 0; j < 4; j++)
+    for (int j = 0; j < 5; j++)
     {
-        for (int k = 0; k < 4; k++)
+        for (int k = 0; k < 5; k++)
         {
-            objs[j * 4 + k].ca = vec3(0.0);
-            objs[j * 4 + k].cd = vec3(0.4, 0.4, 0.4);
-            objs[j * 4 + k].cs = vec3(0.0);
-            objs[j * 4 + k].cr = vec3(0.0);
-            objs[j * 4 + k].blend = 0.0;
-            objs[j * 4 + k].xform = mat4(1.0, 0.0, 0.0, 0.0,
+            objs[j * 5 + k].ca = vec3(0.0);
+            objs[j * 5 + k].cd = vec3(0.4, 0.4, 0.4);
+            objs[j * 5 + k].cs = vec3(0.0);
+            objs[j * 5 + k].cr = vec3(0.0);
+            objs[j * 5 + k].blend = 0.0;
+            objs[j * 5 + k].xform = mat4(1.0, 0.0, 0.0, 0.0,
                                  0.0, 1.0, 0.0, 0.0,
                                  0.0, 0.0, 1.0, 0.0,
-                                 j * 0.65, 0.0, k * 0.65, 1.0);
-            objs[j * 4 + k].type = 1;
-            objs[j * 4 + k].shininess = 1.0;
+                                 j * 2, 0.0, k * 2, 1.0);
+            objs[j * 5 + k].type = 1;
+            objs[j * 5 + k].shininess = 1.0;
         }
     }
-    objs[16].ca = vec3(0.0);
-    objs[16].cd = vec3(0.4, 0.4, 0.4);
-    objs[16].cs = vec3(0.0);
-    objs[16].cr = vec3(0.0);
-    objs[16].blend = 0.0;
-    objs[16].xform = mat4(60.0, 0.0, 0.0, 0.0,
+    objs[25].ca = vec3(0.2);
+    objs[25].cd = vec3(0.4, 0.4, 0.4);
+    objs[25].cs = vec3(0.0);
+    objs[25].cr = vec3(0.0);
+    objs[25].blend = 0.0;
+    objs[25].xform = mat4(120.0, 0.0, 0.0, 0.0,
                          0.0, 0.1, 0.0, 0.0,
-                         0.0, 0.0, 60.0, 0.0,
+                         0.0, 0.0, 120.0, 0.0,
                          0.0,-0.6, 0.0, 1.0);
-    objs[16].type = 1;
-    objs[16].shininess = 1.0;
+    objs[25].type = 1;
+    objs[25].shininess = 1.0;
 
     // objs[1].ca = vec3(228.0 / 455.0, 240.0 / 455.0, 213.0 / 455.0);
     // objs[1].cd = vec3(228.0 / 255.0, 240.0 / 255.0, 213.0 / 255.0);
@@ -314,6 +314,7 @@ void main(void)
         return;
     }
     if (i.t == -1.0) {
+		outColor = vec4(0.7);
         return;
     }
 
@@ -345,6 +346,7 @@ void main(void)
     }
 
     outColor = vec4(res, 1.0);
-    // outColor = vec4(texture2D(textureSampler, vec2(x, y) / height).rgb, 1.0);
+    vec4 fog = vec4(2.0 * clamp(1 - (1.0 / pow(firstT - 1.0, 0.3)), 0.0, 1.0)) * vec4(0.7);
+    outColor += fog;
 }
 

@@ -127,14 +127,14 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.norm = normalize(minPos);
     
     // BUMP MAPPING
-// 	vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
-// 	vec3 v = normalize(cross(u, i.norm));
-// 	mat3 m = mat3(u, v, i.norm);
-// 	float A = texture2D(textureSampler, i.tex).r * bumpDepth;
-// 	float B = texture2D(textureSampler, i.tex + vec2(DELTA, 0.0)).r * bumpDepth;
-// 	float C = texture2D(textureSampler, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
-// 	vec3 norm = normalize(vec3(B - A, C - A, 0.25));
-// 	i.norm = normalize(m * norm);
+        vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
+        vec3 v = normalize(cross(u, i.norm));
+        mat3 m = mat3(u, v, i.norm);
+        float A = texture2D(textureSampler, i.tex).r * bumpDepth;
+        float B = texture2D(textureSampler, i.tex + vec2(DELTA, 0.0)).r * bumpDepth;
+        float C = texture2D(textureSampler, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
+        vec3 norm = normalize(vec3(B - A, C - A, 0.25));
+        i.norm = normalize(m * norm);
 
 
     return i;
@@ -151,8 +151,8 @@ void init()
                          0.0, 6.0, 0.0, 0.0,
                          6.0 * sin(radians(time)), 0.0, 6.0 * cos(radians(time)), 0.0,
                          0.0, 0.0, 0.0, 1.0);
-    objs[1].pos = vec3(4.5, 3.0 * sin(time / 50.0), 0.0);
-    objs[1].radius = 3.0;
+    objs[0].pos = vec3(0.0, 0.0, 0.0);
+    objs[0].radius = 3.0;
     objs[0].type = 0;
     objs[0].shininess = 50.0;
 
@@ -166,7 +166,7 @@ void init()
                          0.0, 0.0,  3.0, 0.0,
                          4.5, 3.0 * sin(time / 50.0),  0.0, 1.0);
     objs[1].pos = vec3(4.5, 3.0 * sin(time / 50.0), 0.0);
-    objs[1].radius = 3.0;
+    objs[1].radius = 1.5;
     objs[1].type = 1;
     objs[1].shininess = 50.0;
 
@@ -180,7 +180,7 @@ void init()
                          0.0, 0.0,  3.0, 0.0,
                          -4.5, -3.0 * sin(time / 50.0),  0.0, 1.0);
     objs[2].pos = vec3(-4.5, -3.0 * sin(time / 50.0),  0.0);
-    objs[2].radius = 3.0;
+    objs[2].radius = 1.5;
     objs[2].type = 2;
     objs[2].shininess = 50.0;
 
@@ -194,7 +194,7 @@ void init()
                          0.0, 0.0,  3.0, 0.0,
                          3.0 * cos(time / 50.0), 4.5,  0.0, 1.0);
     objs[3].pos = vec3(3.0 * cos(time / 50.0), 4.5,  0.0);
-    objs[3].radius = 3.0;
+    objs[3].radius = 1.5;
     objs[3].type = 3;
     objs[3].shininess = 50.0;
 
@@ -208,7 +208,7 @@ void init()
                          0.0, 0.0,  3.0, 0.0,
                          -3.0 * cos(time / 50.0), -4.5,  0.0, 1.0);
     objs[4].pos = vec3(-3.0 * cos(time / 50.0), -4.5, 0.0);
-    objs[4].radius = 3.0;
+    objs[4].radius = 1.5;
     objs[4].type = 4;
     objs[4].shininess = 50.0;
 
@@ -222,7 +222,7 @@ void init()
                          0.0, 0.0,  3.0, 0.0,
                          0.0, 3.0 * cos(time / 50.0),  4.5, 1.0);
     objs[5].pos = vec3(0.0, 3.0 * cos(time / 50.0), 4.5);
-    objs[5].radius = 3.0;
+    objs[5].radius = 1.5;
     objs[5].type = 5;
     objs[5].shininess = 50.0;
 
@@ -236,7 +236,7 @@ void init()
                          0.0, 0.0,  3.0, 0.0,
                          0.0, -3.0 * cos(time / 50.0),  -4.5, 1.0);
     objs[6].pos = vec3(0.0, -3.0 * cos(time / 50.0), -4.5);
-    objs[6].radius = 3.0;
+    objs[6].radius = 1.5;
     objs[6].type = 6;
     objs[6].shininess = 50.0;
 
@@ -280,10 +280,6 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
 void main(void)
 {
-    if (settings == 2) {
-        outColor = vec4(184.0 / 255.0, 169.0 / 255.0, 204.0 / 255.0, 1.0);
-        return;
-    }
 
     float x = gl_FragCoord.x;
     float y = height - gl_FragCoord.y;
@@ -323,6 +319,7 @@ void main(void)
     }
 
     vec3 worldPos = rd * i.t + ro;
+    i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
 
     // AMBIENT OCCLUSION
 
@@ -332,19 +329,17 @@ void main(void)
        if (j == i.obj.type) {
            continue;
        }
-       vec3 dir = objs[j].pos - i.pos;
-       float len = max(0.01, length(dir));
+       vec3 dir = objs[j].pos - worldPos;
+       float len = length(dir);
        float normLen = dot(i.norm, dir / len);
        float h = len / objs[j].radius;
-       float h2 = max(0.01, h * h);
-       ao += max(0.0, normLen) / h2;
+       float h2 = h * h;
+       ao += normLen / h2;
    }
-
-   outColor = vec4(1.0 - ao);
-   return;
+   
+   ao = 1.0 - ao;
 
     // Fix Spec & maybe do less matrix operations for the speed
-    i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
     res += spec * calculateLighting(worldPos, rd, i);
     spec *= i.obj.cr;
 
@@ -370,9 +365,8 @@ void main(void)
         ro = worldPos + (rd / 1000.0);
     }
 
-    outColor = vec4(clamp(res, vec3(0.0), vec3(1.0)), clamp(1.0 / sqrt(firstT), 0.0, 1.0));
+    outColor = vec4(clamp(res, vec3(0.0), vec3(1.0)), clamp(1.0 / sqrt(firstT), 0.0, 1.0)) * ao;
 
-    // outColor = vec4( clamp(1.0 / sqrt(firstT), 0.0, 1.0));
     // outColor = vec4(texture2D(textureSampler, vec2(x, y) / height).rgb, 1.0);
 }
 
