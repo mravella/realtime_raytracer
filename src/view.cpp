@@ -5,6 +5,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <QDebug>
+#include <glm/gtc/matrix_transform.hpp>
 using namespace std;
 
 // Render Pass Numbers
@@ -23,17 +24,14 @@ using namespace std;
 #define AO_KEY Qt::Key_F
 #define BUMP_KEY Qt::Key_G
 #define DOF_KEY Qt::Key_H
-#define ANIMATION_KEY Qt::Key_J
+#define FOG_KEY Qt::Key_J
 
 
 #define PI 3.1415927
 
 /*
  * To Fix:
- * Put shaders in hashtable
- * Make keylisteners make sense
- * Add mouse interaction
- * Add proper logic for render passes
+ * Put shaders in hash table
  */
 
 View::View(QWidget *parent) : QGLWidget(parent)
@@ -66,15 +64,17 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     m_middleMouseDown = false;
     m_rightMouseDown = false;
-    m_leftMouseDown = false;
 
     int m_renderPass = BEAUTY_PASS;
-    bool m_shadowsToggle = false;
-    bool m_textureToggle = false;
-    bool m_reflectionsToggle = false;
-    bool m_aoToggle = false;
-    bool m_bumpToggle = false;
-    bool m_dofToggle = false;
+    m_shadowsToggle = false;
+    m_textureToggle = false;
+    m_reflectionsToggle = false;
+    m_aoToggle = false;
+    m_bumpToggle = false;
+    m_dofToggle = false;
+    m_fogToggle = false;
+
+    m_textures = std::map<string, int>();
 }
 
 View::~View()
@@ -141,18 +141,13 @@ void View::initializeGL()
     glBindVertexArray(0);
 
 
-    m_textureId = loadTexture("/course/cs123/data/image/liqmtl.png");
-    if (m_textureId == -1)
-        cout << "Texture does not exist" << endl;
+    m_textures["marble"] = loadTexture("/course/cs123/data/image/marble.png");
+    if (m_textures["marble"] == -1)
+        cout << "Texture marble does not exist" << endl;
 
-    m_bg = loadTexture(":/shaders/gradient.jpg");
-    if (m_bg == -1)
-        cout << "Texure does not exist" << endl;
-
-    m_noise = loadTexture(":/shaders/noise.png");
-    if (m_noise == -1)
-        cout << "Texure does not exist" << endl;
-
+    m_textures["warehouse"] = loadTexture(":/shaders/warehouse.jpg");
+    if (m_textures["warehouse"] == -1)
+        cout << "Texture warehouse does not exist" << endl;
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -196,10 +191,11 @@ void View::paintGL()
         if (m_setting == 5)
             m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
 
+
         glUseProgram(m_shader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        if (m_setting == 2)
+        if (m_dofToggle)
             glBindFramebuffer(GL_FRAMEBUFFER, m_renderFBO);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -212,17 +208,18 @@ void View::paintGL()
         m_filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_textureId);
+        glBindTexture(GL_TEXTURE_2D, m_textures["marble"]);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_bg);
+        glBindTexture(GL_TEXTURE_2D, m_textures["warehouse"]);
 
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
         glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
         glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
-        glUniform1i(glGetUniformLocation(m_shader, "textureSampler"), 0);
-        glUniform1i(glGetUniformLocation(m_shader, "bg"), 1);
+        glUniform1i(glGetUniformLocation(m_shader, "textureMap0"), 0);
+        glUniform1i(glGetUniformLocation(m_shader, "bumpMap0"), 0);
+        glUniform1i(glGetUniformLocation(m_shader, "textureMap1"), 1);
 
         // Settings
         glUniform1i(glGetUniformLocation(m_shader, "renderPass"), m_renderPass);
@@ -232,19 +229,21 @@ void View::paintGL()
         glUniform1i(glGetUniformLocation(m_shader, "ambientOcclusion"), m_aoToggle);
         glUniform1i(glGetUniformLocation(m_shader, "bump"), m_bumpToggle);
         glUniform1i(glGetUniformLocation(m_shader, "dof"), m_dofToggle);
+        glUniform1i(glGetUniformLocation(m_shader, "fog"), m_fogToggle);
 
         glBindVertexArray(m_vaoID);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
 
-        glBindTexture(GL_TEXTURE_2D, 0);
         glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glUseProgram(0);
 
-        if (m_setting == 2) {
+        if (m_dofToggle && m_renderPass == BEAUTY_PASS) {
             m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
             glUseProgram(m_shader);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -254,9 +253,6 @@ void View::paintGL()
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, m_beautyPass);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, m_noise);
-
             glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
             glUniform1f(glGetUniformLocation(m_shader, "width"), width());
             glUniform1f(glGetUniformLocation(m_shader, "height"), height());
@@ -267,8 +263,6 @@ void View::paintGL()
             glBindVertexArray(0);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -311,8 +305,9 @@ void View::mousePressEvent(QMouseEvent *event)
         m_lastMouse = glm::vec2(event->x(), event->y());
     }
     if (event->button() == Qt::LeftButton) {
-        m_leftMouseDown = true;
+        cout << "Left Button Down" << endl;
         m_lastMouse = glm::vec2(event->x(), event->y());
+        m_leftMouseDown = true;
     }
 }
 
@@ -331,16 +326,20 @@ void View::mouseMoveEvent(QMouseEvent *event)
 //    QCursor::setPos(mapToGlobal(QPoint(width() / 2, height() / 2)));
 
     // TODO: Handle mouse movements here
+    glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
+
     if (m_middleMouseDown) {
-        glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
-        m_pos += glm::vec4(mouseChange.x, -mouseChange.y,0,0) / 500.f;
+        m_pos += glm::vec4(-mouseChange.x * glm::normalize(glm::cross(glm::vec3(m_camera.getUp()), glm::vec3(m_look))) - mouseChange.y * glm::normalize(glm::vec3(m_camera.getUp())), 0.0) / 500.f;
     }
+
     if (m_leftMouseDown) {
-        glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
-        m_focalDepth += mouseChange.x / 100.0;
+        glm::mat4 rotationMatrix = glm::rotate(glm::mat4(), -mouseChange.x * 0.005f, glm::vec3(m_camera.getUp()));
+        m_look = rotationMatrix * m_look;
+        rotationMatrix = glm::rotate(glm::mat4(), mouseChange.y * 0.005f, glm::cross(glm::vec3(m_camera.getUp()), glm::vec3(m_look)));
+        m_look = rotationMatrix * m_look;
     }
+
     if (m_rightMouseDown) {
-        glm::vec2 mouseChange = glm::vec2(event->x(), event->y()) - m_lastMouse;
         glm::vec4 translate = m_look * .001f * mouseChange.x;
         m_pos += translate;
     }
@@ -352,8 +351,10 @@ void View::mouseReleaseEvent(QMouseEvent *event)
         m_middleMouseDown = false;
     if (event->button() == Qt::RightButton)
         m_rightMouseDown = false;
-    if (event->button() == Qt::LeftButton)
-        m_leftMouseDown == false;
+    if (event->button() == Qt::LeftButton) {
+        m_leftMouseDown = false;
+        cout << "Left Button Up" << endl;
+    }
 }
 
 void View::keyPressEvent(QKeyEvent *event)
@@ -408,6 +409,13 @@ void View::keyPressEvent(QKeyEvent *event)
         m_bumpToggle = !m_bumpToggle;
     if (event->key() == Qt::Key_H)
         m_dofToggle = !m_dofToggle;
+    if (event->key() == Qt::Key_J)
+        m_fogToggle = !m_fogToggle;
+
+    if (event->key() == Qt::Key_Up)
+        if (m_focalDepth < 1.0f) m_focalDepth += 0.05f;
+    if (event->key() == Qt::Key_Down)
+        if (m_focalDepth > 0.0f) m_focalDepth -= 0.05f;
 }
 
 
@@ -419,8 +427,6 @@ void View::tick()
 {
     // Get the number of seconds since the last tick (variable update rate)
     float seconds = time.restart() * 0.001f;
-
-    // TODO: Implement the demo update here
 
     // Flag this view for repainting (Qt will call paintGL() soon after)
     update();

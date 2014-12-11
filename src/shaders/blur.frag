@@ -27,7 +27,8 @@ void main(void)
 		kernel[kSize+j] = kernel[kSize-j] = exp(-0.5*float(j)*float(j)/(sigma*sigma))/sigma;
 	}
 	
-        int usingSize = int(pow(abs(focalDepth - depth), 0.3) * 20.0);
+    // int usingSize = int(pow(min(abs(focalDepth - (depth + 0.05)), abs(focalDepth - (depth - 0.05))), 0.3) * 20.0);
+    int usingSize = int(clamp(100.0 * pow(depth - focalDepth, 2.0) - 0.1, 0.0, 15.0));
 	int kUsingSize = (usingSize - 1) / 2;
 	
 	for (int i=-kUsingSize; i <= kUsingSize; ++i)

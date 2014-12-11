@@ -50,8 +50,6 @@ private:
     float m_heightAngle;
     int m_count;
     int m_textureId;
-    int m_bg;
-    int m_noise;
     GLint m_arraySize;
     GLfloat *m_kernel;
     GLfloat *m_offsets;
@@ -63,6 +61,7 @@ private:
     bool m_aoToggle;
     bool m_bumpToggle;
     bool m_dofToggle;
+    bool m_fogToggle;
 
     float m_focalDepth;
 
@@ -74,7 +73,7 @@ private:
     bool m_leftMouseDown;
     glm::vec2 m_lastMouse;
 
-    std::map<std::string, GLuint> m_shaders;
+    std::map<std::string, int> m_textures;
 
 private slots:
     void tick();
