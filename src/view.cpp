@@ -7,6 +7,25 @@
 #include <QDebug>
 using namespace std;
 
+// Render Pass Numbers
+#define BEAUTY_PASS 0
+#define AO_PASS 1
+#define NORMAL_PASS 2
+#define DEPTH_PASS 3
+#define AMBIENT_PASS 4
+#define DIFFUSE_PASS 5
+#define SPEC_PASS 6
+
+// Toggle Key
+#define SHADOWS_KEY Qt::Key_A
+#define TEXTURE_KEY Qt::Key_S
+#define REFLECTIONS_KEY Qt::Key_D
+#define AO_KEY Qt::Key_F
+#define BUMP_KEY Qt::Key_G
+#define DOF_KEY Qt::Key_H
+#define ANIMATION_KEY Qt::Key_J
+
+
 #define PI 3.1415927
 
 /*
@@ -49,8 +68,13 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_rightMouseDown = false;
     m_leftMouseDown = false;
 
-
-
+    int m_renderPass = BEAUTY_PASS;
+    bool m_shadowsToggle = false;
+    bool m_textureToggle = false;
+    bool m_reflectionsToggle = false;
+    bool m_aoToggle = false;
+    bool m_bumpToggle = false;
+    bool m_dofToggle = false;
 }
 
 View::~View()
@@ -163,7 +187,7 @@ void View::paintGL()
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
-
+        glDeleteProgram(m_shader);
         m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
         if (m_setting == 2)
             m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/dof.frag");
@@ -196,10 +220,18 @@ void View::paintGL()
         glUniform1f(glGetUniformLocation(m_shader, "height"), height());
         glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
         glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
-        glUniform1i(glGetUniformLocation(m_shader, "settings"), m_setting);
         glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
         glUniform1i(glGetUniformLocation(m_shader, "textureSampler"), 0);
         glUniform1i(glGetUniformLocation(m_shader, "bg"), 1);
+
+        // Settings
+        glUniform1i(glGetUniformLocation(m_shader, "renderPass"), m_renderPass);
+        glUniform1i(glGetUniformLocation(m_shader, "shadows"), m_shadowsToggle);
+        glUniform1i(glGetUniformLocation(m_shader, "textureMapping"), m_textureToggle);
+        glUniform1i(glGetUniformLocation(m_shader, "reflections"), m_reflectionsToggle);
+        glUniform1i(glGetUniformLocation(m_shader, "ambientOcclusion"), m_aoToggle);
+        glUniform1i(glGetUniformLocation(m_shader, "bump"), m_bumpToggle);
+        glUniform1i(glGetUniformLocation(m_shader, "dof"), m_dofToggle);
 
         glBindVertexArray(m_vaoID);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -237,7 +269,7 @@ void View::paintGL()
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, 0);
             glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, m_noise);
+            glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glUseProgram(0);
@@ -328,30 +360,54 @@ void View::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) QApplication::quit();
 
-    // TODO: Handle keyboard presses here
+    // Scenes
     if (event->key() == Qt::Key_1) {
         m_renderSettings = !m_renderSettings;
     }
-    if (event->key() == Qt::Key_2) {
-        m_setting = 2;
-    }
-    if (event->key() == Qt::Key_3) {
-        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
-        m_setting = 3;
-    }
-    if (event->key() == Qt::Key_4) {
-        m_setting = 4;
-    }
-    if (event->key() == Qt::Key_5) {
-        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
-        m_setting = 5;
-    }
-    if (event->key() == Qt::Key_Up) {
-        if (m_focalDepth < .9) m_focalDepth += 0.05;
-    }
-    if (event->key() == Qt::Key_Down) {
-        if (m_focalDepth > 0.1) m_focalDepth -= 0.05;
-    }
+//    if (event->key() == Qt::Key_2) {
+//        m_setting = 2;
+//    }
+//    if (event->key() == Qt::Key_3) {
+//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
+//        m_setting = 3;
+//    }
+//    if (event->key() == Qt::Key_4) {
+//        m_setting = 4;
+//    }
+//    if (event->key() == Qt::Key_5) {
+//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+//        m_setting = 5;
+//    }
+
+    // Render Passes
+    if (event->key() == Qt::Key_Q)
+        m_renderPass = BEAUTY_PASS;
+    if (event->key() == Qt::Key_W)
+        m_renderPass = AO_PASS;
+    if (event->key() == Qt::Key_E)
+        m_renderPass = NORMAL_PASS;
+    if (event->key() == Qt::Key_R)
+        m_renderPass = DEPTH_PASS;
+    if (event->key() == Qt::Key_T)
+        m_renderPass = AMBIENT_PASS;
+    if (event->key() == Qt::Key_Y)
+        m_renderPass = DIFFUSE_PASS;
+    if (event->key() == Qt::Key_U)
+        m_renderPass = SPEC_PASS;
+
+    // Toggles
+    if (event->key() == Qt::Key_A)
+        m_shadowsToggle = !m_shadowsToggle;
+    if (event->key() == Qt::Key_S)
+        m_textureToggle = !m_textureToggle;
+    if (event->key() == Qt::Key_D)
+        m_reflectionsToggle = !m_reflectionsToggle;
+    if (event->key() == Qt::Key_F)
+        m_aoToggle = !m_aoToggle;
+    if (event->key() == Qt::Key_G)
+        m_bumpToggle = !m_bumpToggle;
+    if (event->key() == Qt::Key_H)
+        m_dofToggle = !m_dofToggle;
 }
 
 

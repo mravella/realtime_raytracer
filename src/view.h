@@ -56,6 +56,14 @@ private:
     GLfloat *m_kernel;
     GLfloat *m_offsets;
 
+    int m_renderPass;
+    bool m_shadowsToggle;
+    bool m_textureToggle;
+    bool m_reflectionsToggle;
+    bool m_aoToggle;
+    bool m_bumpToggle;
+    bool m_dofToggle;
+
     float m_focalDepth;
 
     GLuint m_renderFBO;

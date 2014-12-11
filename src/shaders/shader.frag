@@ -1,15 +1,13 @@
 #version 400
 
-
 #define M_PI 3.14159265359
-#define M_INF 1e16
 #define NUM_OBJS 7
 #define NUM_LIGHTS 2
 #define BLACK vec4(0.0, 0.0, 0.0, 1.0);
 #define kA 0.5
 #define kD 0.5
 #define kS 0.5
-#define MAXDEPTH 2
+#define MAXDEPTH 4
 #define DELTA -1.0 / 512.0
 
 out vec4 outColor;
@@ -18,13 +16,30 @@ uniform float height;
 uniform mat4 filmToWorld;
 uniform mat4 inverseView;
 uniform vec3 eye;
-uniform int settings;
 uniform float time;
 uniform sampler2D textureSampler;
 uniform sampler2D bg;
 
+/*
+ * 0 - Beauty
+ * 1 - AO
+ * 2 - Normals
+ * 3 - Depth
+ * 4 - Ambient
+ * 5 - Diffuse
+ * 6 - Spec
+ */
+// Settings Uniforms
+uniform int renderPass;
+uniform int shadows;
+uniform int textureMapping;
+uniform int reflections;
+uniform int ambientOcclusion;
+uniform int bump;
+uniform int dof;
+
 // Make this a uniform with a control
-float bumpDepth = 10.0;
+float bumpDepth = 5.0;
 
 struct obj
 {
@@ -56,6 +71,7 @@ struct isect
     vec2 tex;
 } i;
 
+// RETURN SMALLER OF TWO NUMBERS THAT IS GREATER THAN 0, ELSE -1
 float smallestPos(float a, float b)
 {
     if (a <= 0.0 && b < 0.0) {
@@ -72,6 +88,7 @@ float smallestPos(float a, float b)
     }
 }
 
+// COMPUTE QUADRATIC FORMULA
 float quadratic(float a, float b, float c)
 {
     float dscr = pow(b, 2.0) - (4.0 * a * c);
@@ -84,6 +101,7 @@ float quadratic(float a, float b, float c)
     }
 }
 
+// INTERSECT WITH OBJECT SPACE SPHERE
 float intersectSphere(vec3 ro, vec3 rd)
 {
     float a = pow(rd.x, 2.0) + pow(rd.y, 2.0) + pow(rd.z, 2.0);
@@ -93,6 +111,7 @@ float intersectSphere(vec3 ro, vec3 rd)
     return quadratic(a, b, c);
 }
 
+// SAMPLE TEXTURE MAP FOR HEIGHT
 float getHeight(vec2 uv, float blend)
 {
     return ((1.0 - blend) * 1.0 + blend * texture2D(textureSampler, uv).r);
@@ -127,6 +146,8 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.norm = normalize(minPos);
     
     // BUMP MAPPING
+    if (bump == 1)
+    {
         vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
         vec3 v = normalize(cross(u, i.norm));
         mat3 m = mat3(u, v, i.norm);
@@ -135,6 +156,7 @@ isect intersectObjs(vec3 ro, vec3 rd)
         float C = texture2D(textureSampler, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
         vec3 norm = normalize(vec3(B - A, C - A, 0.25));
         i.norm = normalize(m * norm);
+    }
 
 
     return i;
@@ -142,11 +164,11 @@ isect intersectObjs(vec3 ro, vec3 rd)
 
 void init()
 {
-    objs[0].ca = vec3(0.0, 0.0, 0.0);
-    objs[0].cd = vec3(0.3);
+    objs[0].ca = vec3(0.0);
+    objs[0].cd = vec3(1.0);
     objs[0].cs = vec3(1.0, 1.0, 1.0);
     objs[0].cr = vec3(0.3);
-    objs[0].blend = 0.5;
+    objs[0].blend = 1.0;
     objs[0].xform = mat4(6.0 * cos(radians(time)), 0.0, 6.0 * -sin(radians(time)), 0.0,
                          0.0, 6.0, 0.0, 0.0,
                          6.0 * sin(radians(time)), 0.0, 6.0 * cos(radians(time)), 0.0,
@@ -212,7 +234,7 @@ void init()
     objs[4].type = 4;
     objs[4].shininess = 50.0;
 
-    objs[5].ca = vec3(0.0, 0.0, 0.0);
+    objs[5].ca = vec3(0.2, 0.1, 0.15);
     objs[5].cd = vec3(1.0);
     objs[5].cs = vec3(1.0, 1.0, 1.0);
     objs[5].cr = vec3(0.5, 0.5, 0.5);
@@ -251,29 +273,41 @@ void init()
 
 vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 {
-    vec3 res = o.obj.ca;
-    for (int j = 0; j < NUM_LIGHTS; j++)
-    {
-        // vec3 vertToLight = lights[i].pos - pos;
-        // vec3 lightDir = normalize(vertToLight);
-        vec3 lightDir = normalize(-lights[j].pos);
-        // float dist = sqrt(vertToLight.x * vertToLight.x + vertToLight.y * vertToLight.y + vertToLight.z * vertToLight.z);
-
-        vec3 reflectionVec = normalize(reflect(lightDir, o.norm));
-        vec3 posAug = pos + (o.norm / 1000.0);
-
-        // float falloff = max(1.0, (lights[i].function.x + dist * lights[i].function.y + dist * dist * lights[i].function.z));
-        float falloff = 1.0;
-        res.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.r * o.obj.cs.r * kS) / falloff;
-        res.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.g * o.obj.cs.g * kS) / falloff;
-        res.b += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.b * o.obj.cs.b * kS) / falloff;
-
-        res.r += max(0.0, dot(o.norm, lightDir) * lights[j].color.r * ((1.0 - o.obj.blend) * o.obj.cd.r + o.obj.blend * texture2D(textureSampler, o.tex).r) * kD) / falloff;
-        res.g += max(0.0, dot(o.norm, lightDir) * lights[j].color.g * ((1.0 - o.obj.blend) * o.obj.cd.g + o.obj.blend * texture2D(textureSampler, o.tex).g) * kD) / falloff;
-        res.b += max(0.0, dot(o.norm, lightDir) * lights[j].color.b * ((1.0 - o.obj.blend) * o.obj.cd.b + o.obj.blend * texture2D(textureSampler, o.tex).b) * kD) / falloff;
-
-
+    vec3 res = vec3(0.0);
+    if (renderPass != 5 && renderPass != 6) {
+        res += o.obj.ca;
     }
+
+    if (renderPass != 4) {
+        for (int j = 0; j < NUM_LIGHTS; j++)
+        {
+            vec3 lightDir = normalize(-lights[j].pos);
+            vec3 reflectionVec = normalize(reflect(lightDir, o.norm));
+            vec3 posAug = pos + (o.norm / 1000.0);
+
+            vec3 diffuseColor = vec3(0.0);
+            if (textureMapping == 1) {
+                diffuseColor = ((1.0 - o.obj.blend) * o.obj.cd + o.obj.blend * texture2D(textureSampler, o.tex).rgb);
+            }
+            else {
+                diffuseColor = o.obj.cd;
+            }
+
+            float falloff = 1.0;
+            if (renderPass != 5) {
+                res.r += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.r * o.obj.cs.r * kS) / falloff;
+                res.g += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.g * o.obj.cs.g * kS) / falloff;
+                res.b += min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.b * o.obj.cs.b * kS) / falloff;
+            }
+
+            if (renderPass != 6) {
+                res.r += max(0.0, dot(o.norm, lightDir) * lights[j].color.r * diffuseColor.r * kD) / falloff;
+                res.g += max(0.0, dot(o.norm, lightDir) * lights[j].color.g * diffuseColor.g * kD) / falloff;
+                res.b += max(0.0, dot(o.norm, lightDir) * lights[j].color.b * diffuseColor.b * kD) / falloff;
+            }
+        }
+    }
+
     return res;
 }
 
@@ -281,6 +315,7 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 void main(void)
 {
 
+    // COMPUTE RAY ORIGIN AND DIRECTION
     float x = gl_FragCoord.x;
     float y = height - gl_FragCoord.y;
 
@@ -289,21 +324,26 @@ void main(void)
     vec3 rd = normalize(world.xyz / world.w - eye);
     vec3 ro = eye;
 
+    // INITIALIZE SCENE GEOMETRY
     init();
 
     vec3 res = vec3(0.0);
     vec3 spec = vec3(1.0);
     int depth = MAXDEPTH;
 
+    // INTERSECT SCENE
     i = intersectObjs(ro, rd);
     float firstT = i.t;
     if (firstT == -1.0) {
         firstT = 100.0;
     }
 
-    // DEPTH BUFFER
-    
-    if (settings == 4) {
+    // COMPUTE WORLD POSITION AND WORLD NORMAL
+    vec3 worldPos = rd * i.t + ro;
+    i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
+
+    // DEPTH PASS
+    if (renderPass == 3) {
 
         if (i.t == -1.0) {
             outColor = vec4(1.0);
@@ -313,40 +353,58 @@ void main(void)
         return;
     }
 
+    // BACKGROUND COLOR ON MISS
     if (i.t == -1.0) {
         return;
         
     }
 
-    vec3 worldPos = rd * i.t + ro;
-    i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
+    // NORMAL PASS
+    if (renderPass == 2)
+    {
+        outColor = vec4(i.norm, 1.0);
+        return;
+    }
 
     // AMBIENT OCCLUSION
+    float ao = 1.0;
+    if (ambientOcclusion == 1 || renderPass == 1) {
+        ao = 0.0;
+        for (int j = 0; j < NUM_OBJS; j++)
+        {
+            if (j == i.obj.type) {
+                continue;
+            }
+            vec3 dir = objs[j].pos - worldPos;
+            float len = length(dir);
+            float normLen = dot(i.norm, dir / len);
+            float h = len / objs[j].radius;
+            float h2 = h * h;
+            ao += normLen / h2;
+        }
+        ao = 1.0 - ao;
+    }
 
-   float ao = 0.0;
-   for (int j = 0; j < NUM_OBJS; j++)
-   {
-       if (j == i.obj.type) {
-           continue;
-       }
-       vec3 dir = objs[j].pos - worldPos;
-       float len = length(dir);
-       float normLen = dot(i.norm, dir / len);
-       float h = len / objs[j].radius;
-       float h2 = h * h;
-       ao += normLen / h2;
-   }
-   
-   ao = 1.0 - ao;
+    // AMBIENT OCCLUSION PASS
+    if (renderPass == 1) 
+    {
+        outColor = vec4(ao);
+        return;
+    }
 
-    // Fix Spec & maybe do less matrix operations for the speed
+    // COMPUTE LIGHTING FOR INTERSECTION AND FIND REFLECTED RAY
     res += spec * calculateLighting(worldPos, rd, i);
     spec *= i.obj.cr;
 
     rd = reflect(rd, i.norm);
     ro = worldPos + (rd / 1000.0);
 
+    // NO RECURSION ON AMBIENT, DIFFUSE, OR SPEC PASSES
+    if (reflections != 1 || renderPass == 4 || renderPass == 5 || renderPass == 6) {
+        depth = 1;
+    }
 
+    // 'RECURSIVE' LOOP
     for (int j = 0; j < depth - 1; j++)
     {
         i = intersectObjs(ro, rd);
@@ -356,7 +414,6 @@ void main(void)
         }
 
         vec3 worldPos = rd * i.t + ro;
-        // Fix Spec & maybe do less matrix operations for the speed
         i.norm = normalize(inverse(transpose(mat3(i.obj.xform))) * i.norm);
         res += spec * calculateLighting(worldPos, rd, i);
         spec *= i.obj.cr;
@@ -365,8 +422,12 @@ void main(void)
         ro = worldPos + (rd / 1000.0);
     }
 
-    outColor = vec4(clamp(res, vec3(0.0), vec3(1.0)), clamp(1.0 / sqrt(firstT), 0.0, 1.0)) * ao;
+    // CLAMP COLOR AND STORE DEPTH IN ALPHA CHANNEL
+    outColor = vec4(clamp(res, vec3(0.0), vec3(1.0)), clamp(1.0 / sqrt(firstT), 0.0, 1.0));
 
-    // outColor = vec4(texture2D(textureSampler, vec2(x, y) / height).rgb, 1.0);
+    // MULTIPLY IN AO
+    if (ambientOcclusion == 1) {
+        outColor = outColor * ao;
+    }
 }
 
