@@ -64,6 +64,7 @@ View::View(QWidget *parent) : QGLWidget(parent)
 
     m_middleMouseDown = false;
     m_rightMouseDown = false;
+    m_leftMouseDown = false;
 
     int m_renderPass = BEAUTY_PASS;
     m_shadowsToggle = false;
@@ -149,6 +150,8 @@ void View::initializeGL()
     if (m_textures["warehouse"] == -1)
         cout << "Texture warehouse does not exist" << endl;
 
+    m_sphereScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
     time.start();
@@ -182,14 +185,15 @@ void View::paintGL()
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
-        glDeleteProgram(m_shader);
-        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
-        if (m_setting == 2)
-            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/dof.frag");
-        if (m_setting == 3)
-            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
-        if (m_setting == 5)
-            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+//        glDeleteProgram(m_shader);
+//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+//        if (m_setting == 2)
+//            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/dof.frag");
+//        if (m_setting == 3)
+//            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
+//        if (m_setting == 5)
+//            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+        m_shader = m_sphereScene;
 
 
         glUseProgram(m_shader);

@@ -8,6 +8,5 @@
         <file alias="blur.frag">shaders/blur.frag</file>
         <file alias="dof.frag">shaders/dof.frag</file>
         <file alias="earth_texture.jpg">shaders/earth_texture.jpg</file>
-        <file alias="warehouse.jpg">shaders/warehouse.jpg</file>
     </qresource>
 </RCC>

@@ -453,14 +453,14 @@ compiler_rcc_make_all: qrc_Resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp
 qrc_Resources.cpp: ../src/Resources.qrc \
-		../src/shaders/noise.png \
 		../src/shaders/dof.frag \
-		../src/shaders/shader.vert \
-		../src/shaders/blur.frag \
 		../src/shaders/shader.frag \
-		../src/shaders/ssao.frag \
 		../src/shaders/gradient.jpg \
-		../src/shaders/grid.frag
+		../src/shaders/ssao.frag \
+		../src/shaders/grid.frag \
+		../src/shaders/earth_texture.jpg \
+		../src/shaders/shader.vert \
+		../src/shaders/blur.frag
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
@@ -1245,7 +1245,7 @@ mainwindow.o: ../src/mainwindow.cpp ../src/mainwindow.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtGui/qtouchdevice.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtWidgets/qtabwidget.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtGui/qicon.h \
-		ui_mainwindow.h \
+		../src/ui_mainwindow.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QVariant \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtWidgets/QAction \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtWidgets/qaction.h \
@@ -1610,7 +1610,9 @@ view.o: ../src/view.cpp ../src/view.h \
 		../src/glm/gtx/string_cast.inl \
 		../src/glm/gtc/type_ptr.hpp \
 		../src/glm/gtc/type_ptr.inl \
-		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QDebug
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QDebug \
+		../src/glm/gtc/matrix_transform.hpp \
+		../src/glm/gtc/matrix_transform.inl
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o view.o ../src/view.cpp
 
 ResourceLoader.o: ../src/lib/ResourceLoader.cpp ../src/lib/ResourceLoader.h \
