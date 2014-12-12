@@ -26,13 +26,7 @@ using namespace std;
 #define DOF_KEY Qt::Key_H
 #define FOG_KEY Qt::Key_J
 
-
 #define PI 3.1415927
-
-/*
- * To Fix:
- * Put shaders in hash table
- */
 
 View::View(QWidget *parent) : QGLWidget(parent), m_timer(this), m_fps(60.0f), m_increment(0)
 
@@ -61,7 +55,7 @@ View::View(QWidget *parent) : QGLWidget(parent), m_timer(this), m_fps(60.0f), m_
     m_look = glm::vec4(-9.f, -3.2f, -16.f, 0.f);
     m_heightAngle = 45;
     m_count = 0;
-    m_focalDepth = 0.15f;
+    m_focalDepth = 0.4f;
 
     m_middleMouseDown = false;
     m_rightMouseDown = false;
@@ -188,6 +182,7 @@ void View::initializeGL()
     m_rustyScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
     m_blurShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
     m_circusScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/refract.frag");
+    m_winterScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/refract.frag");
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)

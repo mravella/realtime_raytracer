@@ -1,7 +1,7 @@
 #version 400
 
 #define M_PI 3.14159265359
-#define NUM_OBJS 2
+#define NUM_OBJS 4
 #define NUM_LIGHTS 3
 #define kA 0.5
 #define kD 0.5
@@ -42,7 +42,7 @@ uniform int dof;
 uniform int fog;
 
 // Make this a uniform with a control
-float bumpDepth = 1.0;
+float bumpDepth = 0.1;
 
 struct obj
 {
@@ -173,36 +173,70 @@ void init()
     objs[0].ca = vec3(0.0);
     objs[0].cd = vec3(0.6, 0.2, 0.3);
     objs[0].cs = vec3(0.2);
-    objs[0].cr = vec3(0.5);
+    objs[0].cr = vec3(0.3, 0.1, 0.15) * 0.5;
     objs[0].blend = 0.8;
-    objs[0].xform = mat4(10.0, 0.0, 0.0, 0.0,
-                         0.0, 10.0, 0.0, 0.0,
-                         0.0, 0.0, 10.0, 0.0,
-                         0.0, 0.0, 0.0, 1.0);
-    objs[0].pos = vec3(0.0, 0.0, 0.0);
-    objs[0].radius = 5.0;
+    objs[0].xform = mat4(3.0, 0.0, 0.0, 0.0,
+                         0.0, 3.0, 0.0, 0.0,
+                         0.0, 0.0, 3.0, 0.0,
+                         5 * sin(radians(time * 4)), 5 * cos(radians(time * 4)), 0.0, 1.0);
+    objs[0].pos = vec3(5 * sin(radians(time * 4)), 5 * cos(radians(time * 4)), 0.0);
+    objs[0].radius = 1.5;
     objs[0].type = 0;
     objs[0].shininess = 50.0;
     objs[0].isEnvironment = 0;
     objs[0].specBlend = 0;
     objs[0].bumpBlend = 1;
 
-    objs[1].ca = vec3(0.0, 0.0, 0.0);
-    objs[1].cd = vec3(0.0);
-    objs[1].cs = vec3(0.0);
-    objs[1].cr = vec3(0.0);
-    objs[1].blend = 0.0;
-    objs[1].xform = mat4(1000.0, 0.0, 0.0, 0.0,
+    objs[1].ca = vec3(0.0);
+    objs[1].cd = vec3(0.6, 0.2, 0.3);
+    objs[1].cs = vec3(0.2);
+    objs[1].cr = vec3(0.3, 0.1, 0.15) * 0.5;
+    objs[1].blend = 0.8;
+    objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
+                         0.0, 3.0, 0.0, 0.0,
+                         0.0, 0.0, 3.0, 0.0,
+                         5 * cos(radians(time * 5)) - 10, 5 * sin(radians(time * 5)), 0.0, 1.0);
+    objs[1].pos = vec3(5 * cos(radians(time * 5)) - 10, 5 * sin(radians(time * 5)), 0.0);
+    objs[1].radius = 1.5;
+    objs[1].type = 0;
+    objs[1].shininess = 50.0;
+    objs[1].isEnvironment = 0;
+    objs[1].specBlend = 0;
+    objs[1].bumpBlend = 1;
+
+    objs[2].ca = vec3(0.0);
+    objs[2].cd = vec3(0.6, 0.2, 0.3);
+    objs[2].cs = vec3(0.2);
+    objs[2].cr = vec3(0.3, 0.1, 0.15) * 0.5;
+    objs[2].blend = 0.8;
+    objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
+                         0.0, 3.0, 0.0, 0.0,
+                         0.0, 0.0, 3.0, 0.0,
+                         0.0, 5 * sin(radians(time * 6)), 5 * cos(radians(time * 6)), 1.0);
+    objs[2].pos = vec3(0.0, 5 * sin(radians(time * 6)), 5 * cos(radians(time * 6)));
+    objs[2].radius = 1.5;
+    objs[2].type = 0;
+    objs[2].shininess = 50.0;
+    objs[2].isEnvironment = 0;
+    objs[2].specBlend = 0;
+    objs[2].bumpBlend = 1;
+
+    objs[NUM_OBJS - 1].ca = vec3(0.0, 0.0, 0.0);
+    objs[NUM_OBJS - 1].cd = vec3(0.0);
+    objs[NUM_OBJS - 1].cs = vec3(0.0);
+    objs[NUM_OBJS - 1].cr = vec3(0.0);
+    objs[NUM_OBJS - 1].blend = 0.0;
+    objs[NUM_OBJS - 1].xform = mat4(1000.0, 0.0, 0.0, 0.0,
                          0.0, 1000.0, 0.0, 0.0,
                          0.0, 0.0,  1000.0, 0.0,
                          0.0, 0.0, 0.0, 1.0);
-    objs[1].pos = vec3(1000.0, 1000.0, 1000.0);
-    objs[1].radius = 0.0;
-    objs[1].type = 7;
-    objs[1].shininess = 50.0;
-    objs[1].isEnvironment = 1;
-    objs[1].specBlend = 0;
-    objs[1].bumpBlend = 0;
+    objs[NUM_OBJS - 1].pos = vec3(1000.0, 1000.0, 1000.0);
+    objs[NUM_OBJS - 1].radius = 0.0;
+    objs[NUM_OBJS - 1].type = 7;
+    objs[NUM_OBJS - 1].shininess = 50.0;
+    objs[NUM_OBJS - 1].isEnvironment = 1;
+    objs[NUM_OBJS - 1].specBlend = 0;
+    objs[NUM_OBJS - 1].bumpBlend = 0;
 
     lights[0].color = vec3(.82, .85, .88) * 1.2;
     lights[0].function = vec3(0.0, 0.0, 0.0);

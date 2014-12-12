@@ -76,8 +76,8 @@ private:
     // Scenes
     GLuint m_rustyScene;
     GLuint m_blurShader;
-    GLuint m_refractScene;
     GLuint m_circusScene;
+    GLuint m_winterScene;
 
     bool m_middleMouseDown;
     bool m_rightMouseDown;
