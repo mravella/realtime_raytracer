@@ -77,6 +77,14 @@ private:
 
     std::map<std::string, int> m_textures;
 
+    QTimer m_timer;
+    float m_fps;
+    float m_increment;
+    float m_lastUpdate;
+
+    int m_numFrames;
+    float m_currentFPS;
+
 private slots:
     void tick();
 };

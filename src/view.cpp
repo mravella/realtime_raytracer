@@ -34,7 +34,8 @@ using namespace std;
  * Put shaders in hash table
  */
 
-View::View(QWidget *parent) : QGLWidget(parent)
+View::View(QWidget *parent) : QGLWidget(parent), m_timer(this), m_fps(60.0f), m_increment(0)
+
 {
     // View needs all mouse move events, not just mouse drag events
     setMouseTracking(true);
@@ -76,6 +77,12 @@ View::View(QWidget *parent) : QGLWidget(parent)
     m_fogToggle = false;
 
     m_textures = std::map<string, int>();
+
+    // Start the timer for updating the screen
+    m_timer.start( 1000.0f / m_fps );
+
+    m_lastUpdate = QTime(0,0).msecsTo(QTime::currentTime());
+    m_numFrames = 0;
 }
 
 View::~View()
@@ -193,6 +200,16 @@ void View::paintGL()
 //            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
 //        if (m_setting == 5)
 //            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+
+        m_numFrames++;
+        int time = QTime(0,0).msecsTo(QTime::currentTime());
+
+        if (time - m_lastUpdate > 1000) {
+            m_currentFPS = (float)m_numFrames / (float)((time - m_lastUpdate)/1000.f);
+            m_numFrames = 0;
+            m_lastUpdate = time;
+        }
+
         m_shader = m_sphereScene;
 
 
@@ -273,16 +290,15 @@ void View::paintGL()
             glUseProgram(0);
         }
 
+        //Draw FPS
+        glColor3f( 1.f, 1.f, 1.f );
+
+        // QGLWidget's renderText takes xy coordinates, a string, and a font
+
 
         if (m_renderSettings) {
             glColor3f(1.0f, 1.0f, 1.0f);
-            int x = rand() % 100;
-            if (x > 76)
-                this->renderText(10, 18, "fps 60.1");
-            else if (x < 34)
-                this->renderText(10, 18, "fps 59.7");
-            else
-                this->renderText(10, 18, "fps 60.0");
+            this->renderText( 10, 20, "FPS: " + QString::number(((int)(m_currentFPS*10.0)/10.0)));
             this->renderText(10, height() - 66, "(1) Toggle Settings");
             this->renderText(10, height() - 52, "(2) Depth of Field");
             this->renderText(10, height() - 38, "(3) Light Spheres");
