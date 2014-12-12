@@ -457,17 +457,19 @@ compiler_rcc_clean:
 qrc_Resources.cpp: ../src/Resources.qrc \
 		../src/shaders/ssao.frag \
 		../src/shaders/grid.frag \
-		../src/shaders/earth_texture.jpg \
-		../src/shaders/dof.frag \
+		../src/shaders/shader.vert \
+		../src/shaders/ball_texture.jpg \
+		../src/shaders/rusty_spec.jpg \
+		../src/shaders/matte_plastic_bump.jpg \
 		../src/shaders/blur.frag \
+		../src/shaders/refract.frag \
+		../src/shaders/rusty_bump.jpg \
+		../src/shaders/dof.frag \
+		../src/shaders/rusty_texture.jpg \
 		../src/shaders/shader.frag \
 		../src/shaders/warehouse.jpg \
-		../src/shaders/gradient.jpg \
-		../src/shaders/rusty_spec.jpg \
-		../src/shaders/rusty_texture.jpg \
 		../src/shaders/draw.frag \
-		../src/shaders/shader.vert \
-		../src/shaders/rusty_bump.jpg
+		../src/shaders/circus.jpg
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp

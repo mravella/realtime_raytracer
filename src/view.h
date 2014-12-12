@@ -71,10 +71,14 @@ private:
     GLuint m_renderFBO;
     GLuint m_beautyPass;
 
+    int m_scene;
+
     // Scenes
-    GLuint m_sphereScene;
+    GLuint m_rustyScene;
     GLuint m_blurShader;
     GLuint m_paintShader;
+    GLuint m_circusScene;
+    GLuint m_winterScene;
 
     bool m_middleMouseDown;
     bool m_rightMouseDown;
