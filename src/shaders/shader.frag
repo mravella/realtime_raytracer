@@ -1,12 +1,12 @@
 #version 400
 
 #define M_PI 3.14159265359
-#define NUM_OBJS 7
+#define NUM_OBJS 8
 #define NUM_LIGHTS 2
 #define kA 0.5
-#define kD 0.5
-#define kS 0.5
-#define MAXDEPTH 2
+#define kD 0.615
+#define kS 0.2
+#define MAXDEPTH 4
 #define DELTA -1.0 / 512.0
 #define FOG_COLOR vec4(0.7)
 
@@ -19,7 +19,8 @@ uniform vec3 eye;
 uniform float time;
 uniform sampler2D textureMap0;
 uniform sampler2D bumpMap0;
-uniform sampler2D textureMap1;
+uniform sampler2D specMap0;
+uniform sampler2D environmentMap;
 
 /*
  * 0 - Beauty
@@ -42,7 +43,6 @@ uniform int fog;
 
 // Make this a uniform with a control
 float bumpDepth = 5.0;
-sampler2D textures[2];
 
 struct obj
 {
@@ -56,7 +56,9 @@ struct obj
     float shininess;
     vec3 pos;
     float radius;
-    int textureId;
+    int isEnvironment;
+    float specBlend;
+    int bumpBlend;
 } objs[NUM_OBJS];
 
 struct light
@@ -142,9 +144,15 @@ isect intersectObjs(vec3 ro, vec3 rd)
     i.pos = minPos;
     i.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
     i.norm = normalize(minPos);
+
+    // ENVIRONMENT SPHERE GETS AMBIENT TEXTURE
+    if (i.obj.isEnvironment == 1)
+    {
+        i.obj.ca = texture2D(environmentMap, i.tex).rgb;
+    }
     
     // BUMP MAPPING
-    if (bump == 1)
+    if (bump == 1 && i.obj.isEnvironment == 0 && i.obj.bumpBlend == 1)
     {
         vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
         vec3 v = normalize(cross(u, i.norm));
@@ -162,10 +170,10 @@ isect intersectObjs(vec3 ro, vec3 rd)
 
 void init()
 {
-    objs[0].ca = vec3(0.0);
+    objs[0].ca = vec3(0.05);
     objs[0].cd = vec3(1.0);
     objs[0].cs = vec3(1.0, 1.0, 1.0);
-    objs[0].cr = vec3(0.3);
+    objs[0].cr = vec3(0.2);
     objs[0].blend = 1.0;
     objs[0].xform = mat4(6.0 * cos(radians(time)), 0.0, 6.0 * -sin(radians(time)), 0.0,
                          0.0, 6.0, 0.0, 0.0,
@@ -175,12 +183,14 @@ void init()
     objs[0].radius = 3.0;
     objs[0].type = 0;
     objs[0].shininess = 50.0;
-    objs[0].textureId = 0;
+    objs[0].isEnvironment = 0;
+    objs[0].specBlend = 1;
+    objs[0].bumpBlend = 1;
 
-    objs[1].ca = vec3(0.0, 0.0, 0.0);
-    objs[1].cd = vec3(1.0);
-    objs[1].cs = vec3(1.0, 1.0, 1.0);
-    objs[1].cr = vec3(0.5, 0.5, 0.5);
+    objs[1].ca = vec3(0.1);
+    objs[1].cd = vec3(0.0);
+    objs[1].cs = vec3(1.0);
+    objs[1].cr = vec3(1.0);
     objs[1].blend = 0.0;
     objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
@@ -190,12 +200,14 @@ void init()
     objs[1].radius = 1.5;
     objs[1].type = 1;
     objs[1].shininess = 50.0;
-    objs[1].textureId = 0;
+    objs[1].isEnvironment = 0;
+    objs[1].specBlend = 0;
+    objs[1].bumpBlend = 0;
 
-    objs[2].ca = vec3(0.0, 0.0, 0.0);
-    objs[2].cd = vec3(1.0);
-    objs[2].cs = vec3(1.0, 1.0, 1.0);
-    objs[2].cr = vec3(0.5, 0.5, 0.5);
+    objs[2].ca = vec3(0.1);
+    objs[2].cd = vec3(0.0);
+    objs[2].cs = vec3(1.0);
+    objs[2].cr = vec3(1.0);
     objs[2].blend = 0.0;
     objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
@@ -205,12 +217,14 @@ void init()
     objs[2].radius = 1.5;
     objs[2].type = 2;
     objs[2].shininess = 50.0;
-    objs[2].textureId = 0;
+    objs[2].isEnvironment = 0;
+    objs[2].specBlend = 0;
+    objs[2].bumpBlend = 0;
 
-    objs[3].ca = vec3(0.0, 0.0, 0.0);
-    objs[3].cd = vec3(1.0);
-    objs[3].cs = vec3(1.0, 1.0, 1.0);
-    objs[3].cr = vec3(0.5, 0.5, 0.5);
+    objs[3].ca = vec3(0.1);
+    objs[3].cd = vec3(0.0);
+    objs[3].cs = vec3(1.0);
+    objs[3].cr = vec3(1.0);
     objs[3].blend = 0.0;
     objs[3].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
@@ -220,12 +234,14 @@ void init()
     objs[3].radius = 1.5;
     objs[3].type = 3;
     objs[3].shininess = 50.0;
-    objs[3].textureId = 0;
+    objs[3].isEnvironment = 0;
+    objs[3].specBlend = 0;
+    objs[3].bumpBlend = 0;
 
-    objs[4].ca = vec3(0.0, 0.0, 0.0);
-    objs[4].cd = vec3(1.0);
-    objs[4].cs = vec3(1.0, 1.0, 1.0);
-    objs[4].cr = vec3(0.5, 0.5, 0.5);
+    objs[4].ca = vec3(0.1);
+    objs[4].cd = vec3(0.0);
+    objs[4].cs = vec3(1.0);
+    objs[4].cr = vec3(1.0);
     objs[4].blend = 0.0;
     objs[4].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
@@ -235,13 +251,15 @@ void init()
     objs[4].radius = 1.5;
     objs[4].type = 4;
     objs[4].shininess = 50.0;
-    objs[4].textureId = 0;
+    objs[4].isEnvironment = 0;
+    objs[4].specBlend = 0;
+    objs[4].bumpBlend = 0;
 
-    objs[5].ca = vec3(0.2, 0.1, 0.15);
-    objs[5].cd = vec3(1.0);
-    objs[5].cs = vec3(1.0, 1.0, 1.0);
-    objs[5].cr = vec3(0.5, 0.5, 0.5);
-    objs[5].blend = 1.0;
+    objs[5].ca = vec3(0.1);
+    objs[5].cd = vec3(0.0);
+    objs[5].cs = vec3(1.0);
+    objs[5].cr = vec3(1.0);
+    objs[5].blend = 0.0;
     objs[5].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0,  3.0, 0.0,
@@ -250,12 +268,14 @@ void init()
     objs[5].radius = 1.5;
     objs[5].type = 5;
     objs[5].shininess = 50.0;
-    objs[5].textureId = 1;
+    objs[5].isEnvironment = 0;
+    objs[5].specBlend = 0;
+    objs[5].bumpBlend = 0;
 
-    objs[6].ca = vec3(0.0, 0.0, 0.0);
-    objs[6].cd = vec3(1.0);
-    objs[6].cs = vec3(1.0, 1.0, 1.0);
-    objs[6].cr = vec3(0.5, 0.5, 0.5);
+    objs[6].ca = vec3(0.1);
+    objs[6].cd = vec3(0.0);
+    objs[6].cs = vec3(1.0);
+    objs[6].cr = vec3(1.0);
     objs[6].blend = 0.0;
     objs[6].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
@@ -265,7 +285,26 @@ void init()
     objs[6].radius = 1.5;
     objs[6].type = 6;
     objs[6].shininess = 50.0;
-    objs[6].textureId = 0;
+    objs[6].isEnvironment = 0;
+    objs[6].specBlend = 0;
+    objs[6].bumpBlend = 0;
+
+    objs[7].ca = vec3(0.0, 0.0, 0.0);
+    objs[7].cd = vec3(0.0);
+    objs[7].cs = vec3(0.0);
+    objs[7].cr = vec3(0.0);
+    objs[7].blend = 0.0;
+    objs[7].xform = mat4(1000.0, 0.0, 0.0, 0.0,
+                         0.0, 1000.0, 0.0, 0.0,
+                         0.0, 0.0,  1000.0, 0.0,
+                         0.0, 0.0, 0.0, 1.0);
+    objs[7].pos = vec3(1000.0, 1000.0, 1000.0);
+    objs[7].radius = 0.0;
+    objs[7].type = 7;
+    objs[7].shininess = 50.0;
+    objs[7].isEnvironment = 1;
+    objs[7].specBlend = 0;
+    objs[7].bumpBlend = 0;
 
     lights[0].color = vec3(1.0, 1.0, 1.0);
     lights[0].function = vec3(0.0, 0.0, 0.0);
@@ -294,7 +333,7 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
         vec3 diffuseColor = vec3(0.0);
         if (textureMapping == 1) {
-            diffuseColor = ((1.0 - o.obj.blend) * o.obj.cd + o.obj.blend * texture2D(textures[0], o.tex).rgb);
+            diffuseColor = ((1.0 - o.obj.blend) * o.obj.cd + o.obj.blend * texture2D(textureMap0, o.tex).rgb);
         }
         else {
             diffuseColor = o.obj.cd;
@@ -302,11 +341,14 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
         int shadow = 1;
 
+        // SPECULAR MAPPING
+        float specMap = (1.0) * (1.0 - o.obj.specBlend) + (o.obj.specBlend) * texture2D(specMap0, o.tex).r;
+
         float falloff = 1.0;
         if (renderPass != 5) {
-            res.r += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.r * o.obj.cs.r * kS) / falloff;
-            res.g += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.g * o.obj.cs.g * kS) / falloff;
-            res.b += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.b * o.obj.cs.b * kS) / falloff;
+            res.r += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.r * o.obj.cs.r * kS * specMap) / falloff;
+            res.g += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.g * o.obj.cs.g * kS * specMap) / falloff;
+            res.b += shadow * min(1.0, pow(max(0.0, dot(reflectionVec, rd)), o.obj.shininess) * lights[j].color.b * o.obj.cs.b * kS * specMap) / falloff;
         }
 
         if (renderPass != 6) {
@@ -322,10 +364,6 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
 void main(void)
 {
-    textures[0] = textureMap0;
-    textures[1] = textureMap1;
-
-
     // COMPUTE RAY ORIGIN AND DIRECTION
     float x = gl_FragCoord.x;
     float y = height - gl_FragCoord.y;
@@ -422,7 +460,7 @@ void main(void)
     {
         i = intersectObjs(ro, rd);
 
-        if (i.t == -1.0) {
+        if (i.t == -1.0 || lessThanEqual(spec, vec3(0.2)).x) {
             break;
         }
 

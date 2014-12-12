@@ -68,7 +68,9 @@ private:
     GLuint m_renderFBO;
     GLuint m_beautyPass;
 
+    // Scenes
     GLuint m_sphereScene;
+    GLuint m_blurShader;
 
     bool m_middleMouseDown;
     bool m_rightMouseDown;
