@@ -9,6 +9,6 @@ uniform float height;
 
 void main(void)
 {	
-	outColor = texture2D(tex, gl_FragCoord.xy / vec2(width, height));
+	outColor = texture2D(tex, vec2(gl_FragCoord.x, height - gl_FragCoord.y) / vec2(width, height)).bgra;
 
 }
