@@ -178,6 +178,7 @@ void View::initializeGL()
 
     m_sphereScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
     m_blurShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
+    m_paintShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/draw.frag");
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -212,93 +213,125 @@ void View::paintGL()
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
-        m_numFrames++;
-        int time = QTime(0,0).msecsTo(QTime::currentTime());
+        //draw the painterly render
+        if(m_paintMode) {
+            if(!m_painted) {
+                m_painted = true;
 
-        if (time - m_lastUpdate > 1000) {
-            m_currentFPS = (float)m_numFrames / (float)((time - m_lastUpdate)/1000.f);
-            m_numFrames = 0;
-            m_lastUpdate = time;
+                QList<int>* brushes = new QList<int>();
+                brushes->append(32);
+                brushes->append(8);
+                brushes->append(4);
+                brushes->append(1);
+
+                GLubyte pixelData[width()*height()*4];
+                glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+                GLubyte* render = m_painter->paintImage(pixelData, width(), height());
+
+                QImage image = QImage(render, width(), height(), QImage::Format_ARGB32);
+                QImage texture = QGLWidget::convertToGLFormat(image);
+
+    //            glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE, render);
+
+                // Generate a new OpenGL texture ID to put our image into
+                GLuint id = 0;
+                glGenTextures(1, &id);
+
+                // Make the texture we just created the new active texture
+                glBindTexture(GL_TEXTURE_2D, id);
+
+                // Copy the image data into the OpenGL texture
+                gluBuild2DMipmaps(GL_TEXTURE_2D, 3, texture.width(), texture.height(), GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
+
+                // Set filtering options
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+                // Set coordinate wrapping options
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+                m_shader = m_paintShader;
+                glUseProgram(m_shader);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, id);
+
+                glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
+                glUniform1f(glGetUniformLocation(m_shader, "width"), width());
+                glUniform1f(glGetUniformLocation(m_shader, "height"), height());
+
+                glBindVertexArray(m_vaoID);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                glBindVertexArray(0);
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glUseProgram(0);
+            }
         }
+        else {
+            m_numFrames++;
+            int time = QTime(0,0).msecsTo(QTime::currentTime());
 
-        m_shader = m_sphereScene;
+            if (time - m_lastUpdate > 1000) {
+                m_currentFPS = (float)m_numFrames / (float)((time - m_lastUpdate)/1000.f);
+                m_numFrames = 0;
+                m_lastUpdate = time;
+            }
+
+            m_shader = m_sphereScene;
 
 
-        glUseProgram(m_shader);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        if (m_dofToggle)
-            glBindFramebuffer(GL_FRAMEBUFFER, m_renderFBO);
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        m_camera.orientLook(m_pos, m_look, m_up);
-        m_camera.setHeightAngle(m_heightAngle);
-
-        glm::mat4 viewMatrix = m_camera.getViewMatrix();
-        m_eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
-        m_filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_textures["rusty_texture"]);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, m_textures["rusty_bump"]);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, m_textures["rusty_spec"]);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, m_textures["warehouse"]);
-
-        glUniform1f(glGetUniformLocation(m_shader, "width"), width());
-        glUniform1f(glGetUniformLocation(m_shader, "height"), height());
-        glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
-        glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
-        glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
-        glUniform1i(glGetUniformLocation(m_shader, "textureMap0"), 0);
-        glUniform1i(glGetUniformLocation(m_shader, "bumpMap0"), 1);
-        glUniform1i(glGetUniformLocation(m_shader, "specMap0"), 2);
-        glUniform1i(glGetUniformLocation(m_shader, "environmentMap"), 3);
-
-        // Settings
-        glUniform1i(glGetUniformLocation(m_shader, "renderPass"), m_renderPass);
-        glUniform1i(glGetUniformLocation(m_shader, "shadows"), m_shadowsToggle);
-        glUniform1i(glGetUniformLocation(m_shader, "textureMapping"), m_textureToggle);
-        glUniform1i(glGetUniformLocation(m_shader, "reflections"), m_reflectionsToggle);
-        glUniform1i(glGetUniformLocation(m_shader, "ambientOcclusion"), m_aoToggle);
-        glUniform1i(glGetUniformLocation(m_shader, "bump"), m_bumpToggle);
-        glUniform1i(glGetUniformLocation(m_shader, "dof"), m_dofToggle);
-        glUniform1i(glGetUniformLocation(m_shader, "fog"), m_fogToggle);
-
-        glBindVertexArray(m_vaoID);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        glBindVertexArray(0);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        glUseProgram(0);
-
-        if (m_dofToggle && m_renderPass == BEAUTY_PASS) {
-            m_shader = m_blurShader;
             glUseProgram(m_shader);
+
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            if (m_dofToggle)
+                glBindFramebuffer(GL_FRAMEBUFFER, m_renderFBO);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+            m_camera.orientLook(m_pos, m_look, m_up);
+            m_camera.setHeightAngle(m_heightAngle);
+
+            glm::mat4 viewMatrix = m_camera.getViewMatrix();
+            m_eye = glm::vec3(glm::inverse(viewMatrix) * glm::vec4(0.0, 0.0, 0.0, 1.0));
+            m_filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, m_beautyPass);
-            glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
+            glBindTexture(GL_TEXTURE_2D, m_textures["rusty_texture"]);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, m_textures["rusty_bump"]);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, m_textures["rusty_spec"]);
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, m_textures["warehouse"]);
+
             glUniform1f(glGetUniformLocation(m_shader, "width"), width());
             glUniform1f(glGetUniformLocation(m_shader, "height"), height());
-            glUniform1f(glGetUniformLocation(m_shader, "focalDepth"), m_focalDepth);
+            glUniformMatrix4fv(glGetUniformLocation(m_shader, "filmToWorld"), 1, GL_FALSE, glm::value_ptr(m_filmToWorld));
+            glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
+            glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
+            glUniform1i(glGetUniformLocation(m_shader, "textureMap0"), 0);
+            glUniform1i(glGetUniformLocation(m_shader, "bumpMap0"), 1);
+            glUniform1i(glGetUniformLocation(m_shader, "specMap0"), 2);
+            glUniform1i(glGetUniformLocation(m_shader, "environmentMap"), 3);
+
+            // Settings
+            glUniform1i(glGetUniformLocation(m_shader, "renderPass"), m_renderPass);
+            glUniform1i(glGetUniformLocation(m_shader, "shadows"), m_shadowsToggle);
+            glUniform1i(glGetUniformLocation(m_shader, "textureMapping"), m_textureToggle);
+            glUniform1i(glGetUniformLocation(m_shader, "reflections"), m_reflectionsToggle);
+            glUniform1i(glGetUniformLocation(m_shader, "ambientOcclusion"), m_aoToggle);
+            glUniform1i(glGetUniformLocation(m_shader, "bump"), m_bumpToggle);
+            glUniform1i(glGetUniformLocation(m_shader, "dof"), m_dofToggle);
+            glUniform1i(glGetUniformLocation(m_shader, "fog"), m_fogToggle);
 
             glBindVertexArray(m_vaoID);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -306,25 +339,58 @@ void View::paintGL()
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
             glUseProgram(0);
-        }
 
-        //Draw FPS
-        glColor3f( 1.f, 1.f, 1.f );
+            if (m_dofToggle && m_renderPass == BEAUTY_PASS) {
+                m_shader = m_blurShader;
+                glUseProgram(m_shader);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // QGLWidget's renderText takes xy coordinates, a string, and a font
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, m_beautyPass);
+                glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
+                glUniform1f(glGetUniformLocation(m_shader, "width"), width());
+                glUniform1f(glGetUniformLocation(m_shader, "height"), height());
+                glUniform1f(glGetUniformLocation(m_shader, "focalDepth"), m_focalDepth);
+
+                glBindVertexArray(m_vaoID);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                glBindVertexArray(0);
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glUseProgram(0);
+            }
+
+            //Draw FPS
+            glColor3f( 1.f, 1.f, 1.f );
+
+            // QGLWidget's renderText takes xy coordinates, a string, and a font
 
 
-        if (m_renderSettings) {
-            glColor3f(1.0f, 1.0f, 1.0f);
-            this->renderText( 10, 20, "FPS: " + QString::number(((int)(m_currentFPS*10.0)/10.0)));
-            this->renderText(10, height() - 66, "(1) Toggle Settings");
-            this->renderText(10, height() - 52, "(2) Depth of Field");
-            this->renderText(10, height() - 38, "(3) Light Spheres");
-            this->renderText(10, height() - 24, "(4) Depth Pass");
-            this->renderText(10, height() - 10, "(5) Recursive Spheres Animation");
+            if (m_renderSettings) {
+                glColor3f(1.0f, 1.0f, 1.0f);
+                this->renderText( 10, 20, "FPS: " + QString::number(((int)(m_currentFPS*10.0)/10.0)));
+                this->renderText(10, height() - 66, "(1) Toggle Settings");
+                this->renderText(10, height() - 52, "(2) Depth of Field");
+                this->renderText(10, height() - 38, "(3) Light Spheres");
+                this->renderText(10, height() - 24, "(4) Depth Pass");
+                this->renderText(10, height() - 10, "(5) Recursive Spheres Animation");
+            }
         }
     }
 }
@@ -460,11 +526,16 @@ void View::keyPressEvent(QKeyEvent *event)
         m_fogToggle = !m_fogToggle;
 
     if (event->key() == Qt::Key_Up)
-        if (m_focalDepth < 1.0f) m_focalDepth += 0.05f;
+        if (m_focalDepth < 1.0f) {
+            m_focalDepth += 0.05f;
+            qDebug() << m_focalDepth;
+        }
     if (event->key() == Qt::Key_Down)
-        if (m_focalDepth > 0.0f) m_focalDepth -= 0.05f;
+        if (m_focalDepth > 0.0f) {
+            m_focalDepth -= 0.05f;
+            qDebug() << m_focalDepth;
+        }
 }
-
 
 void View::keyReleaseEvent(QKeyEvent *event)
 {
@@ -475,25 +546,8 @@ void View::tick()
     // Get the number of seconds since the last tick (variable update rate)
     float seconds = time.restart() * 0.001f;
 
-    //draw the painterly render
-    if(m_paintMode) {
-        if(!m_painted) {
-            GLubyte pixelData[width()*height()*4];
-            glReadPixels(0, 0, width(), height(), GL_RGB, GL_UNSIGNED_BYTE, pixelData);
-            GLubyte* render = m_painter->paintImage(pixelData, width(), height());
-
-            QImage image = QImage(render, width(), height(), QImage::Format_ARGB32);
-            QImage texture = QGLWidget::convertToGLFormat(image);
-
-//            glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE, render);
-            m_painted = true;
-        }
-    }
-    //draw the actual scene
-    else {
-        // Flag this view for repainting (Qt will call paintGL() soon after)
-        update();
-    }
+    // Flag this view for repainting (Qt will call paintGL() soon after)
+    update();
 }
 
 int View::loadTexture(const QString &filename)

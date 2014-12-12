@@ -74,6 +74,7 @@ private:
     // Scenes
     GLuint m_sphereScene;
     GLuint m_blurShader;
+    GLuint m_paintShader;
 
     bool m_middleMouseDown;
     bool m_rightMouseDown;
