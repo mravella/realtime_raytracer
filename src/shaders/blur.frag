@@ -2,6 +2,7 @@
 
 out vec4 outColor;
 uniform sampler2D tex;
+uniform sampler2D beautyPass;
 uniform float width;
 uniform float height;
 uniform float focalDepth;
@@ -10,7 +11,7 @@ uniform float focalDepth;
 
 void main(void)
 {
-	vec4 textureColor = texture2D(tex, gl_FragCoord.xy / vec2(width, height));
+	vec4 textureColor = texture2D(beautyPass, gl_FragCoord.xy / vec2(width, height));
 	float depth = textureColor.a;
 	vec3 c = textureColor.rgb;
 
@@ -35,7 +36,7 @@ void main(void)
 	{
 		for (int j=-kUsingSize; j <= kUsingSize; ++j)
 		{
-			col += kernel[kUsingSize+j]*kernel[kUsingSize+i]*texture2D(tex, (gl_FragCoord.xy+vec2(float(i),float(j))) / vec2(width, height)).rgb;
+			col += kernel[kUsingSize+j]*kernel[kUsingSize+i]*texture2D(beautyPass, (gl_FragCoord.xy+vec2(float(i),float(j))) / vec2(width, height)).rgb;
 			Z += kernel[kUsingSize+j]*kernel[kUsingSize+i];
 		}
 	}

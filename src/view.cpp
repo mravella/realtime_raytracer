@@ -347,10 +347,10 @@ void View::paintGL()
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-            glActiveTexture(GL_TEXTURE0);
+            glActiveTexture(GL_TEXTURE5);
             glBindTexture(GL_TEXTURE_2D, m_beautyPass);
 
-            glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
+            glUniform1i(glGetUniformLocation(m_shader, "beautyPass"), 5);
             glUniform1f(glGetUniformLocation(m_shader, "width"), width());
             glUniform1f(glGetUniformLocation(m_shader, "height"), height());
             glUniform1f(glGetUniformLocation(m_shader, "focalDepth"), m_focalDepth);
@@ -359,7 +359,7 @@ void View::paintGL()
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
             glBindVertexArray(0);
 
-            glActiveTexture(GL_TEXTURE0);
+            glActiveTexture(GL_TEXTURE5);
             glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);

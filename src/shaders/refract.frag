@@ -195,8 +195,8 @@ void init()
     objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         5 * cos(radians(time * 5)) - 10, 5 * sin(radians(time * 5)), 0.0, 1.0);
-    objs[1].pos = vec3(5 * cos(radians(time * 5)) - 10, 5 * sin(radians(time * 5)), 0.0);
+                         5 * cos(radians(time * 5)) - 5, 5 * sin(radians(time * 5)), 0.0, 1.0);
+    objs[1].pos = vec3(5 * cos(radians(time * 5)) - 5, 5 * sin(radians(time * 5)), 0.0);
     objs[1].radius = 1.5;
     objs[1].type = 0;
     objs[1].shininess = 50.0;
@@ -212,8 +212,8 @@ void init()
     objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         0.0, 5 * sin(radians(time * 6)), 5 * cos(radians(time * 6)), 1.0);
-    objs[2].pos = vec3(0.0, 5 * sin(radians(time * 6)), 5 * cos(radians(time * 6)));
+                         0.0, 5 * sin(radians(time * 6)) - 2, 5 * cos(radians(time * 6)), 1.0);
+    objs[2].pos = vec3(0.0, 5 * sin(radians(time * 6)) - 2, 5 * cos(radians(time * 6)));
     objs[2].radius = 1.5;
     objs[2].type = 0;
     objs[2].shininess = 50.0;
