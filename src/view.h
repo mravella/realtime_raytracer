@@ -79,6 +79,7 @@ private:
     GLuint m_paintShader;
     GLuint m_circusScene;
     GLuint m_winterScene;
+    GLuint m_imageScene;
 
     bool m_middleMouseDown;
     bool m_rightMouseDown;

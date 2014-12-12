@@ -177,12 +177,21 @@ void View::initializeGL()
 
     m_textures["ball_color"] = loadTexture(":/shaders/ball_texture.jpg");
     if (m_textures["ball_color"] == -1)
-        cout << "Textures ball color does not exist" << endl;
+        cout << "Texture ball color does not exist" << endl;
+
+    m_textures["apples"] = loadTexture(":/shaders/apples.jpg");
+    if (m_textures["apples"] == -1)
+        cout << "Texture apples does not exist" << endl;
+
+    m_textures["skiff"] = loadTexture(":/shaders/skiff.jpg");
+    if (m_textures["skiff"] == -1)
+        cout << "Texture apples does not exist" << endl;
 
     m_rustyScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
     m_blurShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
     m_paintShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/draw.frag");
     m_circusScene = ResourceLoader::loadShaders(":/shaders/shader.vert",":/shaders/refract.frag");
+    m_imageScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/image.frag");
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -403,6 +412,38 @@ void View::paintGL()
 
                 glUseProgram(0);
             }
+            else if (m_scene >= 8) {
+                m_shader = m_imageScene;
+
+                glActiveTexture(GL_TEXTURE0);
+                if (m_scene == 8)
+                    glBindTexture(GL_TEXTURE_2D, m_textures["apples"]);
+                if (m_scene == 9)
+                    glBindTexture(GL_TEXTURE_2D, m_textures["skiff"]);
+                if (m_scene == 10)
+                    glBindTexture(GL_TEXTURE_2D, m_textures["ball_color"]);
+
+                glUniform1f(glGetUniformLocation(m_shader, "width"), width());
+                glUniform1f(glGetUniformLocation(m_shader, "height"), height());
+                glUniform1f(glGetUniformLocation(m_shader, "tex"), 0);
+
+                glBindVertexArray(m_vaoID);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+                glBindVertexArray(0);
+
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE2);
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glActiveTexture(GL_TEXTURE3);
+                glBindTexture(GL_TEXTURE_2D, 0);
+
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+                glUseProgram(0);
+            }
             if (m_dofToggle && m_renderPass == BEAUTY_PASS) {
                 m_shader = m_blurShader;
                 glUseProgram(m_shader);
@@ -525,17 +566,15 @@ void View::keyPressEvent(QKeyEvent *event)
     if (event->key() == Qt::Key_3) {
         m_scene = 1;
     }
-//    if (event->key() == Qt::Key_3) {
-//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
-//        m_setting = 3;
-//    }
-//    if (event->key() == Qt::Key_4) {
-//        m_setting = 4;
-//    }
-//    if (event->key() == Qt::Key_5) {
-//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
-//        m_setting = 5;
-//    }
+    if (event->key() == Qt::Key_8) {
+        m_scene = 8;
+    }
+    if (event->key() == Qt::Key_9) {
+        m_scene= 9;
+    }
+    if (event->key() == Qt::Key_0) {
+        m_scene = 10;
+    }
 
     // Painterly Render
     if (event->key() == Qt::Key_P) {

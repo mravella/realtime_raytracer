@@ -448,22 +448,22 @@ compiler_rcc_make_all: qrc_Resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp
 qrc_Resources.cpp: Resources.qrc \
-		shaders/ssao.frag \
-		shaders/ball_texture.jpg \
-		shaders/warehouse.jpg \
-		shaders/refract.frag \
 		shaders/matte_plastic_bump.jpg \
-		shaders/grid.frag \
-		shaders/dof.frag \
-		shaders/shader.vert \
 		shaders/blur.frag \
-		shaders/circus.jpg \
-		shaders/rusty_spec.jpg \
-		shaders/rusty_texture.jpg \
-		shaders/shader.frag \
-		shaders/draw.frag \
 		shaders/rusty_bump.jpg \
-		shaders/canvas_texture.jpg
+		shaders/shader.vert \
+		shaders/circus.jpg \
+		shaders/skiff.jpg \
+		shaders/draw.frag \
+		shaders/image.frag \
+		shaders/canvas_texture.jpg \
+		shaders/apples.jpg \
+		shaders/rusty_texture.jpg \
+		shaders/refract.frag \
+		shaders/ball_texture.jpg \
+		shaders/shader.frag \
+		shaders/warehouse.jpg \
+		shaders/rusty_spec.jpg
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
