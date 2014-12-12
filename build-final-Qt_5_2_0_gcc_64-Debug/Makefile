@@ -49,7 +49,8 @@ SOURCES       = ../src/main.cpp \
 		../src/mainwindow.cpp \
 		../src/view.cpp \
 		../src/lib/ResourceLoader.cpp \
-		../src/camera.cpp qrc_Resources.cpp \
+		../src/camera.cpp \
+		../src/painterlyrender.cpp qrc_Resources.cpp \
 		moc_mainwindow.cpp \
 		moc_view.cpp
 OBJECTS       = main.o \
@@ -57,6 +58,7 @@ OBJECTS       = main.o \
 		view.o \
 		ResourceLoader.o \
 		camera.o \
+		painterlyrender.o \
 		qrc_Resources.o \
 		moc_mainwindow.o \
 		moc_view.o
@@ -428,7 +430,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/final1.0.0 || mkdir -p .tmp/final1.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/Resources.qrc .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.h ../src/view.h ../src/lib/ResourceLoader.h ../src/camera.h .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/main.cpp ../src/mainwindow.cpp ../src/view.cpp ../src/lib/ResourceLoader.cpp ../src/camera.cpp .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.ui .tmp/final1.0.0/ && (cd `dirname .tmp/final1.0.0` && $(TAR) final1.0.0.tar final1.0.0 && $(COMPRESS) final1.0.0.tar) && $(MOVE) `dirname .tmp/final1.0.0`/final1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/final1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/Resources.qrc .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.h ../src/view.h ../src/lib/ResourceLoader.h ../src/camera.h ../src/painterlyrender.h .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/main.cpp ../src/mainwindow.cpp ../src/view.cpp ../src/lib/ResourceLoader.cpp ../src/camera.cpp ../src/painterlyrender.cpp .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.ui .tmp/final1.0.0/ && (cd `dirname .tmp/final1.0.0` && $(TAR) final1.0.0.tar final1.0.0 && $(COMPRESS) final1.0.0.tar) && $(MOVE) `dirname .tmp/final1.0.0`/final1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/final1.0.0
 
 
 clean:compiler_clean 
@@ -453,14 +455,14 @@ compiler_rcc_make_all: qrc_Resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp
 qrc_Resources.cpp: ../src/Resources.qrc \
-		../src/shaders/dof.frag \
 		../src/shaders/shader.frag \
-		../src/shaders/gradient.jpg \
 		../src/shaders/ssao.frag \
+		../src/shaders/dof.frag \
 		../src/shaders/grid.frag \
-		../src/shaders/earth_texture.jpg \
+		../src/shaders/gradient.jpg \
+		../src/shaders/blur.frag \
 		../src/shaders/shader.vert \
-		../src/shaders/blur.frag
+		../src/shaders/earth_texture.jpg
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
@@ -1848,6 +1850,83 @@ camera.o: ../src/camera.cpp ../src/camera.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qset.h \
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qcontiguouscache.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o camera.o ../src/camera.cpp
+
+painterlyrender.o: ../src/painterlyrender.cpp ../src/painterlyrender.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QDebug \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qdebug.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qalgorithms.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qglobal.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qconfig.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qfeatures.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qsystemdetection.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qprocessordetection.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qcompilerdetection.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qglobalstatic.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qbasicatomic.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qgenericatomic.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_msvc.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_integrity.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qoldbasicatomic.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_vxworks.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_power.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_alpha.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_armv7.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_armv6.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_armv5.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_bfin.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_ia64.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_mips.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_s390.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_sh4a.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_sparc.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_x86.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_cxx11.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_gcc.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qatomic_unix.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qmutex.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qlogging.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qflags.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtypeinfo.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtypetraits.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qsysinfo.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qhash.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qchar.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qiterator.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qlist.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qrefcount.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qpair.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qmap.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qtextstream.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qiodevice.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qobject.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qobjectdefs.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qnamespace.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qstring.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qbytearray.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qarraydata.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qstringbuilder.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qcoreevent.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qscopedpointer.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qmetatype.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qvarlengtharray.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qcontainerfwd.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qisenum.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qobject_impl.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qlocale.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qvariant.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qstringlist.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qdatastream.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qregexp.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qstringmatcher.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qshareddata.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qvector.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qpoint.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qset.h \
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/qcontiguouscache.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o painterlyrender.o ../src/painterlyrender.cpp
 
 qrc_Resources.o: qrc_Resources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_Resources.o qrc_Resources.cpp

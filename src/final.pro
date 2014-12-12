@@ -20,12 +20,14 @@ SOURCES += main.cpp \
     mainwindow.cpp \
     view.cpp \
     lib/ResourceLoader.cpp \
-    camera.cpp
+    camera.cpp \
+    painterlyrender.cpp
 
 HEADERS += mainwindow.h \
     view.h \
     lib/ResourceLoader.h \
-    camera.h
+    camera.h \
+    painterlyrender.h
 
 OTHER_FILES += \
     shaders/shader.frag \

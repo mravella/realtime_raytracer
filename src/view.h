@@ -9,6 +9,7 @@
 #include "ResourceLoader.h"
 #include "camera.h"
 #include <string.h>
+#include <painterlyrender.h>
 
 class View : public QGLWidget
 {
@@ -63,6 +64,8 @@ private:
     bool m_dofToggle;
     bool m_fogToggle;
 
+    bool m_paintMode;
+
     float m_focalDepth;
 
     GLuint m_renderFBO;
@@ -84,6 +87,9 @@ private:
 
     int m_numFrames;
     float m_currentFPS;
+
+    bool m_painted;
+    PainterlyRender* m_painter;
 
 private slots:
     void tick();
