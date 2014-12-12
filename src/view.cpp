@@ -151,41 +151,41 @@ void View::initializeGL()
     if (m_textures["marble"] == -1)
         cout << "Texture marble does not exist" << endl;
 
-    m_textures["warehouse"] = loadTexture(":/shaders/warehouse.jpg");
+    m_textures["warehouse"] = loadTexture(":/images/warehouse.jpg");
     if (m_textures["warehouse"] == -1)
         cout << "Texture warehouse does not exist" << endl;
 
-    m_textures["rusty_bump"] = loadTexture(":/shaders/rusty_bump.jpg");
+    m_textures["rusty_bump"] = loadTexture(":/images/rusty_bump.jpg");
     if (m_textures["rusty_bump"] == -1)
         cout << "Texture rusty bump does not exist" << endl;
 
-    m_textures["rusty_texture"] = loadTexture(":/shaders/rusty_texture.jpg");
+    m_textures["rusty_texture"] = loadTexture(":/images/rusty_texture.jpg");
     if (m_textures["rusty_texture"] == -1)
         cout << "Texture rusty texture does not exist" << endl;
 
-    m_textures["rusty_spec"] = loadTexture(":/shaders/rusty_spec.jpg");
+    m_textures["rusty_spec"] = loadTexture(":/images/rusty_spec.jpg");
     if (m_textures["rusty_spec"] == -1)
         cout << "Texture rusty spec does not exist" << endl;
 
-    m_textures["circus"] = loadTexture(":/shaders/circus.jpg");
+    m_textures["circus"] = loadTexture(":/images/circus.jpg");
     if (m_textures["circus"] == -1)
         cout << "Texture circus does not exist" << endl;
 
-    m_textures["plastic"] = loadTexture(":/shaders/matte_plastic_bump.jpg");
+    m_textures["plastic"] = loadTexture(":/images/matte_plastic_bump.jpg");
     if (m_textures["plastic"] == -1)
         cout << "Texture plastic does not exist" << endl;
 
-    m_textures["ball_color"] = loadTexture(":/shaders/ball_texture.jpg");
+    m_textures["ball_color"] = loadTexture(":/images/ball_texture.jpg");
     if (m_textures["ball_color"] == -1)
         cout << "Texture ball color does not exist" << endl;
 
-    m_textures["apples"] = loadTexture(":/shaders/apples.jpg");
+    m_textures["apples"] = loadTexture(":/images/apples.jpg");
     if (m_textures["apples"] == -1)
         cout << "Texture apples does not exist" << endl;
 
-    m_textures["skiff"] = loadTexture(":/shaders/skiff.jpg");
+    m_textures["skiff"] = loadTexture(":/images/skiff.jpg");
     if (m_textures["skiff"] == -1)
-        cout << "Texture apples does not exist" << endl;
+        cout << "Texture skiff does not exist" << endl;
 
     m_rustyScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
     m_blurShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");

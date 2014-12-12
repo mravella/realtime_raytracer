@@ -1,1 +1,13 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/images">
+        <file alias="ball_texture.jpg">shaders/ball_texture.jpg</file>
+        <file alias="canvas_texture.jpg">shaders/canvas_texture.jpg</file>
+        <file alias="circus.jpg">shaders/circus.jpg</file>
+        <file alias="matte_plastic_bump.jpg">shaders/matte_plastic_bump.jpg</file>
+        <file alias="rusty_bump.jpg">shaders/rusty_bump.jpg</file>
+        <file alias="rusty_spec.jpg">shaders/rusty_spec.jpg</file>
+        <file alias="rusty_texture.jpg">shaders/rusty_texture.jpg</file>
+        <file alias="warehouse.jpg">shaders/warehouse.jpg</file>
+        <file alias="apples.jpg">shaders/apples.jpg</file>
+    </qresource>
+</RCC>

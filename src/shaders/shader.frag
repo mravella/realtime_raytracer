@@ -43,6 +43,7 @@ uniform int fog;
 
 // Make this a uniform with a control
 float bumpDepth = 3.0;
+int m_recursive = 0;
 
 struct obj
 {
@@ -344,6 +345,10 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
         }
 
         int shadow = 1;
+        if (shadows == 1 && m_recursive == 0) {
+            i = intersectObjs(posAug, lightDir);
+            shadow = int(i.obj.isEnvironment == 1 || i.t == -1);
+        }
 
         // SPECULAR MAPPING
         float specMap = (1.0) * (1.0 - o.obj.specBlend) + (o.obj.specBlend) * texture2D(specMap0, o.tex).r;
@@ -459,6 +464,7 @@ void main(void)
         depth = 1;
     }
 
+    m_recursive = 1;
     // 'RECURSIVE' LOOP
     for (int j = 0; j < depth - 1; j++)
     {

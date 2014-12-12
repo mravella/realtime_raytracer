@@ -25,7 +25,6 @@ PainterlyRender::~PainterlyRender()
 
 GLubyte* PainterlyRender::paintImage(GLubyte* imageData, int width, int height, QList<int>* brushes)
 {
-    qDebug() << "painting image";
     m_data = imageData;
 
     m_dataWidth = width;
@@ -62,8 +61,6 @@ GLubyte* PainterlyRender::paintImage(GLubyte* imageData, int width, int height, 
 
     delete brushes;
     delete[] scaledCanvas;
-
-    qDebug() << "finished painting";
 
     return resultCanvas;
 }

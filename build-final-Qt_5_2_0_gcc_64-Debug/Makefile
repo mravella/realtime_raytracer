@@ -51,6 +51,7 @@ SOURCES       = ../src/main.cpp \
 		../src/lib/ResourceLoader.cpp \
 		../src/camera.cpp \
 		../src/painterlyrender.cpp qrc_Resources.cpp \
+		qrc_ImageResources.cpp \
 		moc_mainwindow.cpp \
 		moc_view.cpp
 OBJECTS       = main.o \
@@ -60,6 +61,7 @@ OBJECTS       = main.o \
 		camera.o \
 		painterlyrender.o \
 		qrc_Resources.o \
+		qrc_ImageResources.o \
 		moc_mainwindow.o \
 		moc_view.o
 DIST          = ../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/mkspecs/features/spec_pre.prf \
@@ -168,6 +170,7 @@ DIST          = ../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gc
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/mkspecs/features/lex.prf \
 		../src/final.pro \
 		../src/Resources.qrc \
+		../src/ImageResources.qrc \
 		../src/final.pro
 QMAKE_TARGET  = final
 DESTDIR       = #avoid trailing-slash linebreak
@@ -308,6 +311,7 @@ Makefile: ../src/final.pro ../../../../../sys/shared/psfu/contrib/projects/qt5.2
 		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/mkspecs/features/lex.prf \
 		../src/final.pro \
 		../src/Resources.qrc \
+		../src/ImageResources.qrc \
 		/contrib/projects/qt5.2.0/5.2.0/gcc_64/lib/libQt5OpenGL.prl \
 		/contrib/projects/qt5.2.0/5.2.0/gcc_64/lib/libQt5Widgets.prl \
 		/contrib/projects/qt5.2.0/5.2.0/gcc_64/lib/libQt5Gui.prl \
@@ -419,6 +423,7 @@ Makefile: ../src/final.pro ../../../../../sys/shared/psfu/contrib/projects/qt5.2
 ../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/mkspecs/features/lex.prf:
 ../src/final.pro:
 ../src/Resources.qrc:
+../src/ImageResources.qrc:
 /contrib/projects/qt5.2.0/5.2.0/gcc_64/lib/libQt5OpenGL.prl:
 /contrib/projects/qt5.2.0/5.2.0/gcc_64/lib/libQt5Widgets.prl:
 /contrib/projects/qt5.2.0/5.2.0/gcc_64/lib/libQt5Gui.prl:
@@ -430,7 +435,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/final1.0.0 || mkdir -p .tmp/final1.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/Resources.qrc .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.h ../src/view.h ../src/lib/ResourceLoader.h ../src/camera.h ../src/painterlyrender.h .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/main.cpp ../src/mainwindow.cpp ../src/view.cpp ../src/lib/ResourceLoader.cpp ../src/camera.cpp ../src/painterlyrender.cpp .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.ui .tmp/final1.0.0/ && (cd `dirname .tmp/final1.0.0` && $(TAR) final1.0.0.tar final1.0.0 && $(COMPRESS) final1.0.0.tar) && $(MOVE) `dirname .tmp/final1.0.0`/final1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/final1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/Resources.qrc ../src/ImageResources.qrc .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.h ../src/view.h ../src/lib/ResourceLoader.h ../src/camera.h ../src/painterlyrender.h .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/main.cpp ../src/mainwindow.cpp ../src/view.cpp ../src/lib/ResourceLoader.cpp ../src/camera.cpp ../src/painterlyrender.cpp .tmp/final1.0.0/ && $(COPY_FILE) --parents ../src/mainwindow.ui .tmp/final1.0.0/ && (cd `dirname .tmp/final1.0.0` && $(TAR) final1.0.0.tar final1.0.0 && $(COMPRESS) final1.0.0.tar) && $(MOVE) `dirname .tmp/final1.0.0`/final1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/final1.0.0
 
 
 clean:compiler_clean 
@@ -451,26 +456,29 @@ mocables: compiler_moc_header_make_all compiler_moc_source_make_all
 
 check: first
 
-compiler_rcc_make_all: qrc_Resources.cpp
+compiler_rcc_make_all: qrc_Resources.cpp qrc_ImageResources.cpp
 compiler_rcc_clean:
-	-$(DEL_FILE) qrc_Resources.cpp
+	-$(DEL_FILE) qrc_Resources.cpp qrc_ImageResources.cpp
 qrc_Resources.cpp: ../src/Resources.qrc \
-		../src/shaders/ssao.frag \
-		../src/shaders/grid.frag \
 		../src/shaders/shader.vert \
-		../src/shaders/ball_texture.jpg \
-		../src/shaders/rusty_spec.jpg \
-		../src/shaders/matte_plastic_bump.jpg \
-		../src/shaders/blur.frag \
-		../src/shaders/refract.frag \
-		../src/shaders/rusty_bump.jpg \
-		../src/shaders/dof.frag \
-		../src/shaders/rusty_texture.jpg \
-		../src/shaders/shader.frag \
-		../src/shaders/warehouse.jpg \
+		../src/shaders/image.frag \
 		../src/shaders/draw.frag \
-		../src/shaders/circus.jpg
+		../src/shaders/refract.frag \
+		../src/shaders/shader.frag \
+		../src/shaders/blur.frag
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
+
+qrc_ImageResources.cpp: ../src/ImageResources.qrc \
+		../src/shaders/rusty_bump.jpg \
+		../src/shaders/matte_plastic_bump.jpg \
+		../src/shaders/circus.jpg \
+		../src/shaders/ball_texture.jpg \
+		../src/shaders/canvas_texture.jpg \
+		../src/shaders/warehouse.jpg \
+		../src/shaders/apples.jpg \
+		../src/shaders/rusty_spec.jpg \
+		../src/shaders/rusty_texture.jpg
+	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name ImageResources ../src/ImageResources.qrc -o qrc_ImageResources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
 compiler_moc_header_clean:
@@ -2070,6 +2078,9 @@ painterlyrender.o: ../src/painterlyrender.cpp ../src/painterlyrender.h \
 
 qrc_Resources.o: qrc_Resources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_Resources.o qrc_Resources.cpp
+
+qrc_ImageResources.o: qrc_ImageResources.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_ImageResources.o qrc_ImageResources.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp

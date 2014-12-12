@@ -55,4 +55,5 @@ INCLUDEPATH+=/usr/local/Cellar/glew/1.11.0/include
 DEPENDPATH+=/usr/local/Cellar/glew/1.11.0/include
 
 RESOURCES += \
-    Resources.qrc
+    Resources.qrc \
+    ImageResources.qrc
