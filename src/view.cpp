@@ -227,7 +227,7 @@ void View::paintGL()
         glUseProgram(m_shader);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        if (m_dofToggle)
+        if (m_dofToggle && m_renderPass == BEAUTY_PASS)
             glBindFramebuffer(GL_FRAMEBUFFER, m_renderFBO);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

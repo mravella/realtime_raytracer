@@ -50,7 +50,6 @@ public:
         retranslateUi(MainWindow);
 
         QMetaObject::connectSlotsByName(MainWindow);
-
     } // setupUi
 
     void retranslateUi(QMainWindow *MainWindow)

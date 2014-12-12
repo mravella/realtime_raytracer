@@ -2,7 +2,7 @@
 
 #define M_PI 3.14159265359
 #define NUM_OBJS 8
-#define NUM_LIGHTS 2
+#define NUM_LIGHTS 3
 #define kA 0.5
 #define kD 0.615
 #define kS 0.2
@@ -42,7 +42,7 @@ uniform int dof;
 uniform int fog;
 
 // Make this a uniform with a control
-float bumpDepth = 5.0;
+float bumpDepth = 3.0;
 
 struct obj
 {
@@ -306,13 +306,17 @@ void init()
     objs[7].specBlend = 0;
     objs[7].bumpBlend = 0;
 
-    lights[0].color = vec3(1.0, 1.0, 1.0);
+    lights[0].color = vec3(.82, .85, .88) * 1.2;
     lights[0].function = vec3(0.0, 0.0, 0.0);
-    lights[0].pos = vec3(1.0, -1.8, -2.0);
+    lights[0].pos = vec3(-1.0, -2.5, -2.0);
 
-    lights[1].color = vec3(1.0, 1.0, 1.0);
+    lights[1].color = vec3(0.925, .94, .88) * 0.8;
     lights[1].function = vec3(0.0, 0.0, 0.0);
-    lights[1].pos = vec3(0.25, 1.0, -1.0);
+    lights[1].pos = vec3(0.8, -0.5, -1.0);
+
+    lights[2].color = vec3(0.9, 0.94, 1.0) * 2.0;
+    lights[2].function = vec3(0.0, 0.0, 0.0);
+    lights[2].pos = vec3(-0.5, -1.0, 1.5);
 }
 
 vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
