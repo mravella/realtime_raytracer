@@ -446,15 +446,18 @@ compiler_rcc_make_all: qrc_Resources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp
 qrc_Resources.cpp: Resources.qrc \
-		shaders/shader.frag \
+		shaders/warehouse.jpg \
+		shaders/earth_texture.jpg \
+		shaders/shader.vert \
+		shaders/rusty_spec.jpg \
 		shaders/ssao.frag \
 		shaders/grid.frag \
 		shaders/gradient.jpg \
-		shaders/shader.vert \
+		shaders/dof.frag \
 		shaders/blur.frag \
-		shaders/earth_texture.jpg \
-		shaders/warehouse.jpg \
-		shaders/dof.frag
+		shaders/rusty_bump.jpg \
+		shaders/rusty_texture.jpg \
+		shaders/shader.frag
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources Resources.qrc -o qrc_Resources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp
@@ -1604,7 +1607,9 @@ view.o: view.cpp view.h \
 		glm/gtx/string_cast.inl \
 		glm/gtc/type_ptr.hpp \
 		glm/gtc/type_ptr.inl \
-		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QDebug
+		../../../../../sys/shared/psfu/contrib/projects/qt5.2.0/5.2.0/gcc_64/include/QtCore/QDebug \
+		glm/gtc/matrix_transform.hpp \
+		glm/gtc/matrix_transform.inl
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o view.o view.cpp
 
 ResourceLoader.o: lib/ResourceLoader.cpp lib/ResourceLoader.h \

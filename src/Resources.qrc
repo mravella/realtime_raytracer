@@ -8,5 +8,10 @@
         <file alias="blur.frag">shaders/blur.frag</file>
         <file alias="dof.frag">shaders/dof.frag</file>
         <file alias="earth_texture.jpg">shaders/earth_texture.jpg</file>
+        <file alias="warehouse.jpg">shaders/warehouse.jpg</file>
+        <file alias="rusty_bump.jpg">shaders/rusty_bump.jpg</file>
+        <file alias="rusty_spec.jpg">shaders/rusty_spec.jpg</file>
+        <file alias="rusty_texture.jpg">shaders/rusty_texture.jpg</file>
+        <file alias="draw.frag">shaders/draw.frag</file>
     </qresource>
 </RCC>

@@ -160,7 +160,24 @@ void View::initializeGL()
     if (m_textures["warehouse"] == -1)
         cout << "Texture warehouse does not exist" << endl;
 
+    m_textures["gradient"] = loadTexture(":/shaders/gradient.jpg");
+    if (m_textures["gradient"] == -1)
+        cout << "Texture gradient does not exist" << endl;
+
+    m_textures["rusty_bump"] = loadTexture(":/shaders/rusty_bump.jpg");
+    if (m_textures["rusty_bump"] == -1)
+        cout << "Texture rusty bump does not exist" << endl;
+
+    m_textures["rusty_texture"] = loadTexture(":/shaders/rusty_texture.jpg");
+    if (m_textures["rusty_texture"] == -1)
+        cout << "Texture rusty texture does not exist" << endl;
+
+    m_textures["rusty_spec"] = loadTexture(":/shaders/rusty_spec.jpg");
+    if (m_textures["rusty_spec"] == -1)
+        cout << "Texture rusty spec does not exist" << endl;
+
     m_sphereScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
+    m_blurShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -195,15 +212,6 @@ void View::paintGL()
     if (!m_isInitialized){
         std::cout << "You must call init() before you can draw!" << std::endl;
     } else{
-//        glDeleteProgram(m_shader);
-//        m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
-//        if (m_setting == 2)
-//            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/dof.frag");
-//        if (m_setting == 3)
-//            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/grid.frag");
-//        if (m_setting == 5)
-//            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/shader.frag");
-
         m_numFrames++;
         int time = QTime(0,0).msecsTo(QTime::currentTime());
 
@@ -232,8 +240,12 @@ void View::paintGL()
         m_filmToWorld = glm::inverse(m_camera.getScaleMatrix() * viewMatrix);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_textures["marble"]);
+        glBindTexture(GL_TEXTURE_2D, m_textures["rusty_texture"]);
         glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, m_textures["rusty_bump"]);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, m_textures["rusty_spec"]);
+        glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, m_textures["warehouse"]);
 
         glUniform1f(glGetUniformLocation(m_shader, "width"), width());
@@ -242,8 +254,9 @@ void View::paintGL()
         glUniform3f(glGetUniformLocation(m_shader, "eye"), m_eye.x, m_eye.y, m_eye.z);
         glUniform1f(glGetUniformLocation(m_shader, "time"), (float) m_count++);
         glUniform1i(glGetUniformLocation(m_shader, "textureMap0"), 0);
-        glUniform1i(glGetUniformLocation(m_shader, "bumpMap0"), 0);
-        glUniform1i(glGetUniformLocation(m_shader, "textureMap1"), 1);
+        glUniform1i(glGetUniformLocation(m_shader, "bumpMap0"), 1);
+        glUniform1i(glGetUniformLocation(m_shader, "specMap0"), 2);
+        glUniform1i(glGetUniformLocation(m_shader, "environmentMap"), 3);
 
         // Settings
         glUniform1i(glGetUniformLocation(m_shader, "renderPass"), m_renderPass);
@@ -263,12 +276,17 @@ void View::paintGL()
         glBindTexture(GL_TEXTURE_2D, 0);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glUseProgram(0);
 
         if (m_dofToggle && m_renderPass == BEAUTY_PASS) {
-            m_shader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/blur.frag");
+            m_shader = m_blurShader;
             glUseProgram(m_shader);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
