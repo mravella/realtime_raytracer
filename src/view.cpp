@@ -67,7 +67,7 @@ View::View(QWidget *parent) : QGLWidget(parent), m_timer(this), m_fps(60.0f), m_
     m_rightMouseDown = false;
     m_leftMouseDown = false;
 
-    int m_renderPass = BEAUTY_PASS;
+    m_renderPass = BEAUTY_PASS;
     m_shadowsToggle = false;
     m_textureToggle = false;
     m_reflectionsToggle = false;
@@ -308,12 +308,7 @@ void View::paintGL()
             glUseProgram(0);
         }
 
-        //Draw FPS
-        glColor3f( 1.f, 1.f, 1.f );
-
         // QGLWidget's renderText takes xy coordinates, a string, and a font
-
-
         if (m_renderSettings) {
             glColor3f(1.0f, 1.0f, 1.0f);
             this->renderText( 10, 20, "FPS: " + QString::number(((int)(m_currentFPS*10.0)/10.0)));
