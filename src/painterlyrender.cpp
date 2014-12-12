@@ -5,7 +5,7 @@
 
 PainterlyRender::PainterlyRender()
 {
-        QImage* canvasTextureImage = new QImage(QString::fromStdString("/gpfs/main/home/smt3/course/cs123/canvas_texture.jpg"));
+        QImage* canvasTextureImage = new QImage(QString::fromStdString(":/shaders/canvas_texture.jpg"));
         //ensure format is right
         if(canvasTextureImage->format() != QImage::Format_RGB32) {
             QImage *old = canvasTextureImage;
@@ -23,18 +23,21 @@ PainterlyRender::~PainterlyRender()
     delete[] m_canvasTexture;
 }
 
-GLubyte* PainterlyRender::paintImage(GLubyte* imageData, int width, int height)
+GLubyte* PainterlyRender::paintImage(GLubyte* imageData, int width, int height, QList<int>* brushes)
 {
-    QList<int>* brushes = new QList<int>();
-    brushes->append(8);
-    brushes->append(8);
-    brushes->append(4);
-    brushes->append(1);
-
+    qDebug() << "painting image";
     m_data = imageData;
 
     m_dataWidth = width;
     m_dataHeight = height;
+
+//    m_depthData = new GLubyte[width*height*4];
+//    memcpy(m_depthData, imageData, width*height*4);
+
+//    for(int i=0; i<width*height; i++) {
+//        if(imageData[i*4+3] < 255)
+//        qDebug() << imageData[i*4+3];
+//    }
 
     GLubyte* resultCanvas = new GLubyte[m_dataWidth*m_dataHeight*4];
 
@@ -44,7 +47,7 @@ GLubyte* PainterlyRender::paintImage(GLubyte* imageData, int width, int height)
         PainterlyRender::paintLayer(resultCanvas, blurredCanvas, brush);
     }
 
-    //apply the canvas filter
+//    //apply the canvas filter
     BGRA* scaledCanvas = PainterlyRender::scaleImage(m_canvasTexture, m_texWidth, m_texHeight, m_dataWidth, m_dataHeight);
     for(int i=0; i<m_dataWidth; i++) {
         for(int j=0; j<m_dataHeight; j++) {
@@ -59,6 +62,8 @@ GLubyte* PainterlyRender::paintImage(GLubyte* imageData, int width, int height)
 
     delete brushes;
     delete[] scaledCanvas;
+
+    qDebug() << "finished painting";
 
     return resultCanvas;
 }

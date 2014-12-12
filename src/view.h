@@ -76,6 +76,7 @@ private:
     // Scenes
     GLuint m_rustyScene;
     GLuint m_blurShader;
+    GLuint m_paintShader;
     GLuint m_circusScene;
     GLuint m_winterScene;
 

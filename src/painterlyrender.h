@@ -39,7 +39,7 @@ class PainterlyRender
 public:
     PainterlyRender();
     virtual ~PainterlyRender();
-    GLubyte* paintImage(GLubyte* imageData, int width, int height);
+    GLubyte* paintImage(GLubyte* imageData, int width, int height, QList<int>* brushes);
 
 protected:
     BGRA* m_canvasTexture;
@@ -50,6 +50,8 @@ protected:
     int m_dataHeight;
 
     GLubyte* m_data;
+
+    GLubyte* m_depthData;
 
     GLubyte* getBlur(GLubyte* imageData, int radius);
     void paintLayer(GLubyte* resultCanvas, GLubyte* blurredCanvas, int brush);
