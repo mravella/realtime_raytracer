@@ -1,7 +1,7 @@
 #version 400
 
 #define M_PI 3.14159265359
-#define NUM_OBJS 4
+#define NUM_OBJS 6
 #define NUM_LIGHTS 3
 #define kA 0.5
 #define kD 0.5
@@ -178,8 +178,8 @@ void init()
     objs[0].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         5 * sin(radians(time * 4)), 5 * cos(radians(time * 4)), 0.0, 1.0);
-    objs[0].pos = vec3(5 * sin(radians(time * 4)), 5 * cos(radians(time * 4)), 0.0);
+                         10 * sin(radians(time * 4)), 10 * cos(radians(time * 4)), 0.0, 1.0);
+    objs[0].pos = vec3(10 * sin(radians(time * 4)), 10 * cos(radians(time * 4)), 0.0);
     objs[0].radius = 1.5;
     objs[0].type = 0;
     objs[0].shininess = 50.0;
@@ -195,8 +195,8 @@ void init()
     objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         5 * cos(radians(time * 5)) - 5, 5 * sin(radians(time * 5)), 0.0, 1.0);
-    objs[1].pos = vec3(5 * cos(radians(time * 5)) - 5, 5 * sin(radians(time * 5)), 0.0);
+                         10 * cos(radians(time * 5)) - 5, 10 * sin(radians(time * 5)), 0.0, 1.0);
+    objs[1].pos = vec3(10 * cos(radians(time * 5)) - 5, 10 * sin(radians(time * 5)), 0.0);
     objs[1].radius = 1.5;
     objs[1].type = 0;
     objs[1].shininess = 50.0;
@@ -212,14 +212,68 @@ void init()
     objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
                          0.0, 3.0, 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         0.0, 5 * sin(radians(time * 6)) - 2, 5 * cos(radians(time * 6)), 1.0);
-    objs[2].pos = vec3(0.0, 5 * sin(radians(time * 6)) - 2, 5 * cos(radians(time * 6)));
+                         0.0, 10 * sin(radians(time * 6)) - 2, 10 * cos(radians(time * 6)), 1.0);
+    objs[2].pos = vec3(0.0, 10 * sin(radians(time * 6)) - 2, 10 * cos(radians(time * 6)));
     objs[2].radius = 1.5;
     objs[2].type = 0;
     objs[2].shininess = 50.0;
     objs[2].isEnvironment = 0;
     objs[2].specBlend = 0;
     objs[2].bumpBlend = 1;
+
+    objs[3].ca = vec3(0.0);
+    objs[3].cd = vec3(0.1, 0.05, 0.07);
+    objs[3].cs = vec3(1.0);
+    objs[3].cr = vec3(0.9);
+    objs[3].blend = 0.0;
+    objs[3].xform = mat4(6.0, 0.0, 0.0, 0.0,
+                         0.0, 6.0, 0.0, 0.0,
+                         0.0, 0.0, 6.0, 0.0,
+                         0.0, 0.0, 0.0, 1.0);
+    objs[3].pos = vec3(0.0);
+    objs[3].radius = 3.0;
+    objs[3].type = 0;
+    objs[3].shininess = 50.0;
+    objs[3].isEnvironment = 0;
+    objs[3].specBlend = 0;
+    objs[3].bumpBlend = 1;
+
+
+    objs[3].ca = vec3(0.0);
+    objs[3].cd = vec3(0.1, 0.05, 0.07);
+    objs[3].cs = vec3(1.0);
+    objs[3].cr = vec3(0.9);
+    objs[3].blend = 0.0;
+    objs[3].xform = mat4(10.0, 0.0, 0.0, 0.0,
+                         0.0, 10.0, 0.0, 0.0,
+                         0.0, 0.0, 3.0, 0.0,
+                         3.0, 5.0, -10.0, 1.0);
+    objs[3].pos = vec3(0.0);
+    objs[3].radius = 3.0;
+    objs[3].type = 0;
+    objs[3].shininess = 50.0;
+    objs[3].isEnvironment = 0;
+    objs[3].specBlend = 0;
+    objs[3].bumpBlend = 1;
+
+    objs[4].ca = vec3(0.0);
+    objs[4].cd = vec3(0.1, 0.05, 0.07);
+    objs[4].cs = vec3(1.0);
+    objs[4].cr = vec3(0.9);
+    objs[4].blend = 0.0;
+    objs[4].xform = mat4(20.0, 0.0, 0.0, 0.0,
+                         0.0, 20.0, 0.0, 0.0,
+                         0.0, 0.0, 3.0, 0.0,
+                         -8.0, 0.0, 0.0, 1.0);
+    objs[4].pos = vec3(0.0);
+    objs[4].radius = 3.0;
+    objs[4].type = 0;
+    objs[4].shininess = 50.0;
+    objs[4].isEnvironment = 0;
+    objs[4].specBlend = 0;
+    objs[4].bumpBlend = 1;
+
+
 
     objs[NUM_OBJS - 1].ca = vec3(0.0, 0.0, 0.0);
     objs[NUM_OBJS - 1].cd = vec3(0.0);
@@ -238,17 +292,17 @@ void init()
     objs[NUM_OBJS - 1].specBlend = 0;
     objs[NUM_OBJS - 1].bumpBlend = 0;
 
-    lights[0].color = vec3(.82, .85, .88) * 1.2;
+    lights[0].color = vec3(1.0, 0.89, 0.89) * 2.0;
     lights[0].function = vec3(0.0, 0.0, 0.0);
     lights[0].pos = vec3(-1.0, -2.5, -2.0);
 
-    lights[1].color = vec3(0.925, .94, .88) * 0.8;
-    lights[1].function = vec3(0.0, 0.0, 0.0);
-    lights[1].pos = vec3(0.8, -0.5, -1.0);
+    // lights[1].color = vec3(0.925, .94, .88) * 0.8;
+    // lights[1].function = vec3(0.0, 0.0, 0.0);
+    // lights[1].pos = vec3(0.8, -0.5, -1.0);
 
-    lights[2].color = vec3(0.9, 0.94, 1.0) * 2.0;
-    lights[2].function = vec3(0.0, 0.0, 0.0);
-    lights[2].pos = vec3(-0.5, -1.0, 1.5);
+    // lights[2].color = vec3(0.9, 0.94, 1.0) * 2.0;
+    // lights[2].function = vec3(0.0, 0.0, 0.0);
+    // lights[2].pos = vec3(-0.5, -1.0, 1.5);
 }
 
 vec3 calculateLighting(vec3 pos, vec3 rd, isect o)

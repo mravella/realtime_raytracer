@@ -299,7 +299,6 @@ void View::paintGL()
                 m_lastUpdate = time;
             }
 
-            glUseProgram(m_shader);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             if (m_dofToggle && m_renderPass == BEAUTY_PASS)
@@ -316,6 +315,8 @@ void View::paintGL()
 
             if (m_scene == 0) {
                 m_shader = m_rustyScene;
+
+                glUseProgram(m_shader);
 
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, m_textures["rusty_texture"]);
@@ -366,6 +367,8 @@ void View::paintGL()
             else if (m_scene == 1) {
                 m_shader = m_circusScene;
 
+                glUseProgram(m_shader);
+
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, m_textures["ball_color"]);
                 glActiveTexture(GL_TEXTURE1);
@@ -414,6 +417,8 @@ void View::paintGL()
             }
             else if (m_scene >= 8) {
                 m_shader = m_imageScene;
+
+                glUseProgram(m_shader);
 
                 glActiveTexture(GL_TEXTURE0);
                 if (m_scene == 8)
@@ -489,6 +494,20 @@ void View::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
     m_camera.setAspectRatio((float) width() / (float) height());
+
+    glGenFramebuffers( 1, &m_renderFBO );
+    glBindFramebuffer( GL_FRAMEBUFFER, m_renderFBO );
+
+    glActiveTexture( GL_TEXTURE0 );
+    glGenTextures( 1, &m_beautyPass);
+    glBindTexture( GL_TEXTURE_2D, m_beautyPass );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width(), height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL );
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_beautyPass, 0);
+
+    glBindFramebuffer( GL_FRAMEBUFFER, 0);
+
 }
 
 void View::mousePressEvent(QMouseEvent *event)
