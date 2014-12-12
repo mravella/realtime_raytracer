@@ -75,6 +75,7 @@ View::View(QWidget *parent) : QGLWidget(parent), m_timer(this), m_fps(60.0f), m_
     m_bumpToggle = false;
     m_dofToggle = false;
     m_fogToggle = false;
+    m_paintMode = false;
 
     m_textures = std::map<string, int>();
 
@@ -83,6 +84,8 @@ View::View(QWidget *parent) : QGLWidget(parent), m_timer(this), m_fps(60.0f), m_
 
     m_lastUpdate = QTime(0,0).msecsTo(QTime::currentTime());
     m_numFrames = 0;
+
+    m_painter = new PainterlyRender();
 }
 
 View::~View()
@@ -413,6 +416,12 @@ void View::keyPressEvent(QKeyEvent *event)
 //        m_setting = 5;
 //    }
 
+    // Painterly Render
+    if (event->key() == Qt::Key_P) {
+        m_paintMode = !m_paintMode;
+        m_painted = false;
+    }
+
     // Render Passes
     if (event->key() == Qt::Key_Q)
         m_renderPass = BEAUTY_PASS;
@@ -461,8 +470,25 @@ void View::tick()
     // Get the number of seconds since the last tick (variable update rate)
     float seconds = time.restart() * 0.001f;
 
-    // Flag this view for repainting (Qt will call paintGL() soon after)
-    update();
+    //draw the painterly render
+    if(m_paintMode) {
+        if(!m_painted) {
+            GLubyte pixelData[width()*height()*4];
+            glReadPixels(0, 0, width(), height(), GL_RGB, GL_UNSIGNED_BYTE, pixelData);
+            GLubyte* render = m_painter->paintImage(pixelData, width(), height());
+
+            QImage image = QImage(render, width(), height(), QImage::Format_ARGB32);
+            QImage texture = QGLWidget::convertToGLFormat(image);
+
+//            glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE, render);
+            m_painted = true;
+        }
+    }
+    //draw the actual scene
+    else {
+        // Flag this view for repainting (Qt will call paintGL() soon after)
+        update();
+    }
 }
 
 int View::loadTexture(const QString &filename)
