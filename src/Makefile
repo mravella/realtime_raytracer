@@ -453,24 +453,25 @@ compiler_rcc_make_all: qrc_Resources.cpp qrc_ImageResources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp qrc_ImageResources.cpp
 qrc_Resources.cpp: Resources.qrc \
+		shaders/shader.vert \
+		shaders/blur.frag \
+		shaders/superShader.frag \
+		shaders/image.frag \
 		shaders/refract.frag \
 		shaders/draw.frag \
-		shaders/image.frag \
-		shaders/shader.frag \
-		shaders/blur.frag \
-		shaders/shader.vert
+		shaders/shader.frag
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources Resources.qrc -o qrc_Resources.cpp
 
 qrc_ImageResources.cpp: ImageResources.qrc \
-		shaders/rusty_texture.jpg \
-		shaders/ball_texture.jpg \
-		shaders/rusty_spec.jpg \
-		shaders/canvas_texture.jpg \
-		shaders/matte_plastic_bump.jpg \
 		shaders/circus.jpg \
+		shaders/ball_texture.jpg \
 		shaders/rusty_bump.jpg \
+		shaders/apples.jpg \
+		shaders/matte_plastic_bump.jpg \
+		shaders/canvas_texture.jpg \
 		shaders/warehouse.jpg \
-		shaders/apples.jpg
+		shaders/rusty_texture.jpg \
+		shaders/rusty_spec.jpg
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name ImageResources ImageResources.qrc -o qrc_ImageResources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp

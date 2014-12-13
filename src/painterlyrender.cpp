@@ -1,5 +1,6 @@
 #include "painterlyrender.h"
 #include <QDebug>
+#include <iostream>
 #define VAR_E 2.71828182845904523536
 #define VAR_PI 3.14159265359
 
@@ -76,7 +77,7 @@ void PainterlyRender::paintLayer(GLubyte *canvas, GLubyte *blurredImage, int bru
 
     //create an array of differences between the canvas and the blurred image
     int difs[m_dataWidth*m_dataHeight];
-    memset(difs, 0, m_dataWidth*m_dataHeight*sizeof(float));
+    memset(difs, 0, m_dataWidth*m_dataHeight*sizeof(int));
     for(int i=0; i<m_dataHeight; i++) {
         for(int j=0; j<m_dataWidth; j++) {
             int index = i*m_dataWidth + j;
