@@ -76,7 +76,7 @@ struct isect
     vec3 norm;
     obj obj;
     vec2 tex;
-} i;
+} i, i2;
 
 // RETURN SMALLER OF TWO NUMBERS THAT IS GREATER THAN 0, ELSE -1
 float smallestPos(float a, float b)
@@ -120,53 +120,53 @@ float intersectSphere(vec3 ro, vec3 rd)
 
 isect intersectObjs(vec3 ro, vec3 rd)
 {
-    i.t = -1.0;
+    i2.t = -1.0;
     float minT = -1.0;
     obj minObj;
     float currT;
     vec3 minPos;
-    for (int i = 0; i < NUM_OBJS; i++)
+    for (int i2 = 0; i2 < NUM_OBJS; i2++)
     {
         // Don't take inverses.  Precompute.
-        vec3 p = vec3(inverse(objs[i].xform) * vec4(ro, 1.0));
-        vec3 d = vec3(inverse(objs[i].xform) * vec4(rd, 0.0));
+        vec3 p = vec3(inverse(objs[i2].xform) * vec4(ro, 1.0));
+        vec3 d = vec3(inverse(objs[i2].xform) * vec4(rd, 0.0));
 
         currT = intersectSphere(p, d);
 
         if ((currT < minT && currT != -1.0) || (currT > minT && minT == -1.0))
         {
             minT = currT;
-            minObj = objs[i];
+            minObj = objs[i2];
             minPos = p + d * currT;
         }
     }
-    i.t = minT;
-    i.obj = minObj;
-    i.pos = minPos;
-    i.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
-    i.norm = normalize(minPos);
+    i2.t = minT;
+    i2.obj = minObj;
+    i2.pos = minPos;
+    i2.tex = vec2(0.5 - (atan(minPos.z, minPos.x) / (2.0 * M_PI)), 0.5 - (asin(minPos.y / sqrt(dot(minPos, minPos))) / M_PI));
+    i2.norm = normalize(minPos);
 
     // ENVIRONMENT SPHERE GETS AMBIENT TEXTURE
-    if (i.obj.isEnvironment == 1)
+    if (i2.obj.isEnvironment == 1)
     {
-        i.obj.ca = texture2D(environmentMap, i.tex).rgb;
+        i2.obj.ca = texture2D(environmentMap, i2.tex).rgb;
     }
     
     // BUMP MAPPING
-    if (bump == 1 && i.obj.isEnvironment == 0 && i.obj.bumpBlend == 1)
+    if (bump == 1 && i2.obj.isEnvironment == 0 && i2.obj.bumpBlend == 1)
     {
-        vec3 u = normalize(cross(i.norm, vec3(0.0, 1.0, 0.0)));
-        vec3 v = normalize(cross(u, i.norm));
-        mat3 m = mat3(u, v, i.norm);
-        float A = texture2D(bumpMap0, i.tex).r * bumpDepth;
-        float B = texture2D(bumpMap0, i.tex + vec2(DELTA, 0.0)).r * bumpDepth;
-        float C = texture2D(bumpMap0, i.tex + vec2(0.0, DELTA)).r * bumpDepth;
+        vec3 u = normalize(cross(i2.norm, vec3(0.0, 1.0, 0.0)));
+        vec3 v = normalize(cross(u, i2.norm));
+        mat3 m = mat3(u, v, i2.norm);
+        float A = texture2D(bumpMap0, i2.tex).r * bumpDepth;
+        float B = texture2D(bumpMap0, i2.tex + vec2(DELTA, 0.0)).r * bumpDepth;
+        float C = texture2D(bumpMap0, i2.tex + vec2(0.0, DELTA)).r * bumpDepth;
         vec3 norm = normalize(vec3(B - A, C - A, 0.25));
-        i.norm = normalize(m * norm);
+        i2.norm = normalize(m * norm);
     }
 
 
-    return i;
+    return i2;
 }
 
 void init()
@@ -346,8 +346,8 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
 
         int shadow = 1;
         if (shadows == 1 && m_recursive == 0) {
-            i = intersectObjs(posAug, lightDir);
-            shadow = int(i.obj.isEnvironment == 1 || i.t == -1);
+            i2 = intersectObjs(posAug, lightDir);
+            shadow = int(i2.obj.isEnvironment == 1 || i2.t == -1);
         }
 
         // SPECULAR MAPPING
