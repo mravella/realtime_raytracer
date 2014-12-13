@@ -237,11 +237,13 @@ void View::paintGL()
                 brushes->append(4);
                 brushes->append(1);
 
-                GLubyte pixelData[width()*height()*4];
-                glReadPixels(0, 0, width(), height(), GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
-                GLubyte* render = m_painter->paintImage(pixelData, width(), height(), brushes);
+                int storedWidth = width();
+                int storedHeight = height();
+                GLubyte pixelData[storedWidth*storedHeight*4];
+                glReadPixels(0, 0, storedWidth, storedHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
+                GLubyte* render = m_painter->paintImage(pixelData, storedWidth, storedHeight, brushes);
 
-                QImage image = QImage(render, width(), height(), QImage::Format_ARGB32);
+                QImage image = QImage(render, storedWidth, storedHeight, QImage::Format_ARGB32);
                 QImage texture = QGLWidget::convertToGLFormat(image);
 
     //            glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE, render);
@@ -275,8 +277,8 @@ void View::paintGL()
                 glBindTexture(GL_TEXTURE_2D, id);
 
                 glUniform1i(glGetUniformLocation(m_shader, "tex"), 0);
-                glUniform1f(glGetUniformLocation(m_shader, "width"), width());
-                glUniform1f(glGetUniformLocation(m_shader, "height"), height());
+                glUniform1f(glGetUniformLocation(m_shader, "width"), storedWidth);
+                glUniform1f(glGetUniformLocation(m_shader, "height"), storedHeight);
 
                 glBindVertexArray(m_vaoID);
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

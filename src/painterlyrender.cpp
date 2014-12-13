@@ -69,14 +69,12 @@ void PainterlyRender::paintLayer(GLubyte *canvas, GLubyte *blurredImage, int bru
 {
     //create a list of zVals, all initially set to 0
     //zVals are in (0,1), with a higher number being drawn closer to the screen
-    float zVals[m_dataWidth*m_dataHeight];
-    memset(zVals, 0, m_dataWidth*m_dataHeight*sizeof(float));
+    float* zVals = new float[m_dataWidth*m_dataHeight];
 
     float threshold = 25.0; //20 works well too
 
     //create an array of differences between the canvas and the blurred image
-    int difs[m_dataWidth*m_dataHeight];
-    memset(difs, 0, m_dataWidth*m_dataHeight*sizeof(float));
+    int* difs = new int[m_dataWidth*m_dataHeight];
     for(int i=0; i<m_dataHeight; i++) {
         for(int j=0; j<m_dataWidth; j++) {
             int index = i*m_dataWidth + j;
@@ -120,6 +118,9 @@ void PainterlyRender::paintLayer(GLubyte *canvas, GLubyte *blurredImage, int bru
             }
         }
     }
+
+    delete[] difs;
+    delete[] zVals;
 }
 
 void PainterlyRender::makeStroke(GLubyte* canvas, float zVals[], glm::vec2 best, int brush)

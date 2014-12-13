@@ -344,10 +344,17 @@ vec3 calculateLighting(vec3 pos, vec3 rd, isect o)
             diffuseColor = o.obj.cd;
         }
 
-        int shadow = 1;
+        float shadow = 1;
         if (shadows == 1 && m_recursive == 0) {
             i2 = intersectObjs(posAug, lightDir);
             shadow = int(i2.obj.isEnvironment == 1 || i2.t == -1);
+            if(shadow < 0.5) {
+                // COMPUTE WORLD POSITION AND WORLD NORMAL
+                vec3 worldPos = lightDir * i2.t + pos;
+
+                float dist = length(cross(worldPos - pos, pos - i2.obj.pos)) / length(worldPos - pos);
+                shadow = min(max(0.0, (dist / i2.obj.radius)*(dist / i2.obj.radius)), 1.0);
+            }
         }
 
         // SPECULAR MAPPING
