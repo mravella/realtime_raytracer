@@ -6,5 +6,6 @@
         <file alias="draw.frag">shaders/draw.frag</file>
         <file alias="refract.frag">shaders/refract.frag</file>
         <file alias="image.frag">shaders/image.frag</file>
+        <file alias="superShader.frag">shaders/superShader.frag</file>
     </qresource>
 </RCC>

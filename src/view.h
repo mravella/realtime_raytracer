@@ -63,6 +63,7 @@ private:
     bool m_bumpToggle;
     bool m_dofToggle;
     bool m_fogToggle;
+    bool m_superSampleToggle;
 
     bool m_paintMode;
 
@@ -80,6 +81,7 @@ private:
     GLuint m_circusScene;
     GLuint m_winterScene;
     GLuint m_imageScene;
+    GLuint m_superRustyScene;
 
     bool m_middleMouseDown;
     bool m_rightMouseDown;

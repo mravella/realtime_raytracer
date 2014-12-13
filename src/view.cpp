@@ -192,6 +192,7 @@ void View::initializeGL()
     m_paintShader = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/draw.frag");
     m_circusScene = ResourceLoader::loadShaders(":/shaders/shader.vert",":/shaders/refract.frag");
     m_imageScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/image.frag");
+    m_superRustyScene = ResourceLoader::loadShaders(":/shaders/shader.vert", ":/shaders/superShader.frag");
 
     // Start a timer that will try to get 60 frames per second (the actual
     // frame rate depends on the operating system and other running programs)
@@ -348,6 +349,7 @@ void View::paintGL()
                 glUniform1i(glGetUniformLocation(m_shader, "bump"), m_bumpToggle);
                 glUniform1i(glGetUniformLocation(m_shader, "dof"), m_dofToggle);
                 glUniform1i(glGetUniformLocation(m_shader, "fog"), m_fogToggle);
+
 
                 glBindVertexArray(m_vaoID);
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

@@ -172,51 +172,51 @@ void init()
 {
     objs[0].ca = vec3(0.0);
     objs[0].cd = vec3(0.6, 0.2, 0.3);
-    objs[0].cs = vec3(0.2);
+    objs[0].cs = vec3(0.5);
     objs[0].cr = vec3(0.3, 0.1, 0.15) * 0.5;
-    objs[0].blend = 0.8;
-    objs[0].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
+    objs[0].blend = 0.2;
+    objs[0].xform = mat4(3.0 * cos(radians(time * 4)), -3.0 * sin(radians(time * 4)), 0.0, 0.0,
+                         3.0 * sin(radians(time * 4)), 3.0 * cos(radians(time * 4)), 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         10 * sin(radians(time * 4)), 10 * cos(radians(time * 4)), 0.0, 1.0);
-    objs[0].pos = vec3(10 * sin(radians(time * 4)), 10 * cos(radians(time * 4)), 0.0);
+                         10 * sin(radians(time * 6)), 10 * cos(radians(time * 6)), 0.0, 1.0);
+    objs[0].pos = vec3(10 * sin(radians(time * 6)), 10 * cos(radians(time * 6)), 0.0);
     objs[0].radius = 1.5;
     objs[0].type = 0;
-    objs[0].shininess = 50.0;
+    objs[0].shininess = 100.0;
     objs[0].isEnvironment = 0;
     objs[0].specBlend = 0;
     objs[0].bumpBlend = 1;
 
     objs[1].ca = vec3(0.0);
-    objs[1].cd = vec3(0.6, 0.2, 0.3);
+    objs[1].cd = vec3(0.96, 0.94, 0.78);
     objs[1].cs = vec3(0.2);
     objs[1].cr = vec3(0.3, 0.1, 0.15) * 0.5;
-    objs[1].blend = 0.8;
+    objs[1].blend = 0.3;
     objs[1].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
-                         0.0, 0.0, 3.0, 0.0,
-                         10 * cos(radians(time * 5)) - 5, 10 * sin(radians(time * 5)), 0.0, 1.0);
-    objs[1].pos = vec3(10 * cos(radians(time * 5)) - 5, 10 * sin(radians(time * 5)), 0.0);
+                         0.0, 3.0 * cos(radians(time * 4)), -3.0 * sin(radians(time * 4)), 0.0,
+                         0.0, 3.0 * sin(radians(time * 4)), 3.0 * cos(radians(time * 4)), 0.0,
+                         10 * cos(radians(time * 7)) - 5, 10 * sin(radians(time * 7)), 0.0, 1.0);
+    objs[1].pos = vec3(10 * cos(radians(time * 7)) - 5, 10 * sin(radians(time * 7)), 0.0);
     objs[1].radius = 1.5;
     objs[1].type = 0;
-    objs[1].shininess = 50.0;
+    objs[1].shininess = 100.0;
     objs[1].isEnvironment = 0;
     objs[1].specBlend = 0;
     objs[1].bumpBlend = 1;
 
     objs[2].ca = vec3(0.0);
-    objs[2].cd = vec3(0.6, 0.2, 0.3);
+    objs[2].cd = vec3(.77,  .81, .96);
     objs[2].cs = vec3(0.2);
     objs[2].cr = vec3(0.3, 0.1, 0.15) * 0.5;
-    objs[2].blend = 0.8;
-    objs[2].xform = mat4(3.0, 0.0, 0.0, 0.0,
-                         0.0, 3.0, 0.0, 0.0,
+    objs[2].blend = 0.2;
+    objs[2].xform = mat4(3.0 * cos(radians(time * 4)), -3.0 * sin(radians(time * 4)), 0.0, 0.0,
+                         3.0 * sin(radians(time * 4)), 3.0 * cos(radians(time * 4)), 0.0, 0.0,
                          0.0, 0.0, 3.0, 0.0,
-                         0.0, 10 * sin(radians(time * 6)) - 2, 10 * cos(radians(time * 6)), 1.0);
-    objs[2].pos = vec3(0.0, 10 * sin(radians(time * 6)) - 2, 10 * cos(radians(time * 6)));
+                         0.0, 10 * sin(radians(time * 8)) - 2, 10 * cos(radians(time * 8)), 1.0);
+    objs[2].pos = vec3(0.0, 10 * sin(radians(time * 8)) - 2, 10 * cos(radians(time * 8)));
     objs[2].radius = 1.5;
     objs[2].type = 0;
-    objs[2].shininess = 50.0;
+    objs[2].shininess = 100.0;
     objs[2].isEnvironment = 0;
     objs[2].specBlend = 0;
     objs[2].bumpBlend = 1;
@@ -224,7 +224,7 @@ void init()
     objs[3].ca = vec3(0.0);
     objs[3].cd = vec3(0.1, 0.05, 0.07);
     objs[3].cs = vec3(1.0);
-    objs[3].cr = vec3(0.9);
+    objs[3].cr = vec3(0.7);
     objs[3].blend = 0.0;
     objs[3].xform = mat4(6.0, 0.0, 0.0, 0.0,
                          0.0, 6.0, 0.0, 0.0,
@@ -242,7 +242,7 @@ void init()
     objs[3].ca = vec3(0.0);
     objs[3].cd = vec3(0.1, 0.05, 0.07);
     objs[3].cs = vec3(1.0);
-    objs[3].cr = vec3(0.9);
+    objs[3].cr = vec3(0.7);
     objs[3].blend = 0.0;
     objs[3].xform = mat4(10.0, 0.0, 0.0, 0.0,
                          0.0, 10.0, 0.0, 0.0,
@@ -296,13 +296,13 @@ void init()
     lights[0].function = vec3(0.0, 0.0, 0.0);
     lights[0].pos = vec3(-1.0, -2.5, -2.0);
 
-    // lights[1].color = vec3(0.925, .94, .88) * 0.8;
-    // lights[1].function = vec3(0.0, 0.0, 0.0);
-    // lights[1].pos = vec3(0.8, -0.5, -1.0);
+    lights[1].color = vec3(240.0, 242.0, 220.0) / 255.0 * 1.5;
+    lights[1].function = vec3(0.0, 0.0, 0.0);
+    lights[1].pos = vec3(0.8, -0.5, -1.0);
 
-    // lights[2].color = vec3(0.9, 0.94, 1.0) * 2.0;
-    // lights[2].function = vec3(0.0, 0.0, 0.0);
-    // lights[2].pos = vec3(-0.5, -1.0, 1.5);
+    lights[2].color = vec3(1.0, 0.89, 0.89) * 2.0;
+    lights[2].function = vec3(0.0, 0.0, 0.0);
+    lights[2].pos = vec3(-0.5, -1.0, 1.5);
 }
 
 vec3 calculateLighting(vec3 pos, vec3 rd, isect o)

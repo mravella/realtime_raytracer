@@ -461,23 +461,25 @@ compiler_rcc_clean:
 	-$(DEL_FILE) qrc_Resources.cpp qrc_ImageResources.cpp
 qrc_Resources.cpp: ../src/Resources.qrc \
 		../src/shaders/shader.vert \
+		../src/shaders/blur.frag \
 		../src/shaders/image.frag \
-		../src/shaders/draw.frag \
-		../src/shaders/refract.frag \
 		../src/shaders/shader.frag \
-		../src/shaders/blur.frag
+		../src/shaders/superShader.frag \
+		../src/shaders/draw.frag \
+		../src/shaders/refract.frag
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name Resources ../src/Resources.qrc -o qrc_Resources.cpp
 
 qrc_ImageResources.cpp: ../src/ImageResources.qrc \
-		../src/shaders/rusty_bump.jpg \
-		../src/shaders/matte_plastic_bump.jpg \
-		../src/shaders/circus.jpg \
-		../src/shaders/ball_texture.jpg \
-		../src/shaders/canvas_texture.jpg \
-		../src/shaders/warehouse.jpg \
 		../src/shaders/apples.jpg \
+		../src/shaders/ball_texture.jpg \
 		../src/shaders/rusty_spec.jpg \
-		../src/shaders/rusty_texture.jpg
+		../src/shaders/warehouse.jpg \
+		../src/shaders/canvas_texture.jpg \
+		../src/shaders/circus.jpg \
+		../src/shaders/rusty_bump.jpg \
+		../src/shaders/rusty_texture.jpg \
+		../src/shaders/skiff.jpg \
+		../src/shaders/matte_plastic_bump.jpg
 	/contrib/projects/qt5.2.0/5.2.0/gcc_64/bin/rcc -name ImageResources ../src/ImageResources.qrc -o qrc_ImageResources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_view.cpp

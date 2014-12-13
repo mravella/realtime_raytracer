@@ -9,5 +9,6 @@
         <file alias="rusty_texture.jpg">shaders/rusty_texture.jpg</file>
         <file alias="warehouse.jpg">shaders/warehouse.jpg</file>
         <file alias="apples.jpg">shaders/apples.jpg</file>
+        <file alias="skiff.jpg">shaders/skiff.jpg</file>
     </qresource>
 </RCC>
