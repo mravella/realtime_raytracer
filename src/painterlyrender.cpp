@@ -5,7 +5,7 @@
 
 PainterlyRender::PainterlyRender()
 {
-        QImage* canvasTextureImage = new QImage(QString::fromStdString(":/shaders/canvas_texture.jpg"));
+        QImage* canvasTextureImage = new QImage(QString::fromStdString(":/images/canvas_texture.jpg"));
         //ensure format is right
         if(canvasTextureImage->format() != QImage::Format_RGB32) {
             QImage *old = canvasTextureImage;
