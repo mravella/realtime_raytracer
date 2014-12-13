@@ -249,7 +249,7 @@ void init()
                          0.0, 0.0, 3.0, 0.0,
                          3.0, 5.0, -10.0, 1.0);
     objs[3].pos = vec3(0.0);
-    objs[3].radius = 3.0;
+    objs[3].radius = 0.0;
     objs[3].type = 0;
     objs[3].shininess = 50.0;
     objs[3].isEnvironment = 0;
@@ -266,7 +266,7 @@ void init()
                          0.0, 0.0, 3.0, 0.0,
                          -8.0, 0.0, 0.0, 1.0);
     objs[4].pos = vec3(0.0);
-    objs[4].radius = 3.0;
+    objs[4].radius = 0.0;
     objs[4].type = 0;
     objs[4].shininess = 50.0;
     objs[4].isEnvironment = 0;

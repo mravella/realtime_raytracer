@@ -484,11 +484,6 @@ void View::paintGL()
             if (m_renderSettings) {
                 glColor3f(1.0f, 1.0f, 1.0f);
                 this->renderText( 10, 20, "FPS: " + QString::number(((int)(m_currentFPS*10.0)/10.0)));
-                this->renderText(10, height() - 66, "(1) Toggle Settings");
-                this->renderText(10, height() - 52, "(2) Depth of Field");
-                this->renderText(10, height() - 38, "(3) Light Spheres");
-                this->renderText(10, height() - 24, "(4) Depth Pass");
-                this->renderText(10, height() - 10, "(5) Recursive Spheres Animation");
             }
         }
     }
