@@ -33,6 +33,4 @@ Left Mouse - Rotate Look Vector
 Middle Mouse - Pan Camera
 Right Mouse - Dolly Camera
 
-No known bugs.  
-
-No major design decisions necessary, because almost everything is in one fragment shader, and one filter file. 
+Main ray tracer in shader.frag and refract.frag.
